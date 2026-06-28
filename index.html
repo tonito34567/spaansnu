@@ -665,11 +665,12 @@ function clearSent(){
   az.innerHTML='';az.className='ans-zone';
 }
 
+function normalize(str){return str.toLowerCase().replace(/[¡¿.,!?'"]/g,'').replace(/\s+/g,' ').trim();}
 function checkSent(){
   const s=SENTENCES[sIdx%SENTENCES.length];
-  const ans=sTiles.map(t=>t.w).join(' ').replace(/ ([.,!?¡¿])/g,'$1');
-  const cor=s.words.join(' ').replace(/ ([.,!?¡¿])/g,'$1');
-  const ok=ans.toLowerCase()===cor.toLowerCase();
+  const ans=normalize(sTiles.map(t=>t.w).join(' '));
+  const cor=normalize(s.words.join(' '));
+  const ok=ans===cor;
   const fb=document.getElementById('s-fb');
   if(ok){fb.className='sent-fb ok';fb.textContent='¡Perfecto! Goed gedaan! ✓';CU.sentOk++;CU.xp+=15;confetti();toast('✓ Correct! +15 XP');}
   else{fb.className='sent-fb fail';fb.textContent='✗ Niet helemaal. Correct: '+cor;}
