@@ -1,0 +1,786 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#4C3BCF">
+<title>SpanishGo 🇪🇸</title>
+<style>
+:root{
+  --purple:#4C3BCF;--purple-lt:#6C5CE7;--purple-dk:#2D1F8F;
+  --green:#00B894;--green-lt:#00CEC9;
+  --orange:#FF7043;--yellow:#FFD93D;--red:#FF4757;--blue:#2196F3;
+  --pink:#E91E8C;
+  --white:#fff;--off:#F7F5FF;--gray1:#F0EEF8;--gray2:#DDD8F0;
+  --gray3:#9B8EC4;--text:#1A1040;
+  --radius:16px;--radius-sm:10px;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--off);color:var(--text)}
+body{max-width:480px;margin:0 auto;position:relative}
+
+/* ── LOGIN ── */
+#login{min-height:100vh;background:linear-gradient(160deg,var(--purple-dk) 0%,var(--purple) 50%,var(--purple-lt) 100%);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2rem 1.5rem;text-align:center}
+.login-flag{font-size:5rem;margin-bottom:.75rem;animation:bounce 2s infinite}
+@keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+.login-title{font-size:2.4rem;font-weight:800;color:#fff;letter-spacing:-1px;margin-bottom:.2rem}
+.login-tagline{font-size:1rem;color:rgba(255,255,255,.65);margin-bottom:2.5rem}
+.user-row{display:flex;gap:1rem;margin-bottom:2rem;width:100%;max-width:320px}
+.u-card{flex:1;background:rgba(255,255,255,.13);border:2px solid rgba(255,255,255,.22);border-radius:var(--radius);padding:1.25rem .75rem;cursor:pointer;transition:.15s;text-align:center}
+.u-card:hover{background:rgba(255,255,255,.22);border-color:var(--yellow);transform:translateY(-2px)}
+.u-card:active{transform:scale(.95)}
+.u-av{font-size:2.6rem;margin-bottom:.4rem}
+.u-name{font-size:.95rem;font-weight:700;color:#fff}
+.u-xp{font-size:.72rem;color:rgba(255,255,255,.5);margin-top:2px}
+.or-divider{color:rgba(255,255,255,.35);font-size:.85rem;margin-bottom:1.25rem}
+.new-form{display:flex;gap:.5rem;width:100%;max-width:320px}
+.new-form input{flex:1;padding:.8rem 1rem;border-radius:var(--radius-sm);border:2px solid rgba(255,255,255,.2);background:rgba(255,255,255,.1);color:#fff;font-size:.95rem;font-family:inherit;outline:none}
+.new-form input::placeholder{color:rgba(255,255,255,.35)}
+.new-form input:focus{border-color:var(--yellow)}
+.btn-start{padding:.8rem 1.2rem;background:var(--yellow);color:var(--purple-dk);border:none;border-radius:var(--radius-sm);font-size:.95rem;font-weight:800;cursor:pointer;font-family:inherit;transition:.15s;white-space:nowrap}
+.btn-start:active{transform:scale(.96)}
+
+/* ── APP SHELL ── */
+#app{display:none;flex-direction:column;min-height:100vh}
+
+/* TOP BAR */
+.topbar{background:var(--purple);padding:.8rem 1.1rem;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:20}
+.tb-logo{font-size:1.2rem;font-weight:800;color:#fff;letter-spacing:-.3px}
+.tb-right{display:flex;gap:.5rem;align-items:center}
+.xp-pill{background:rgba(255,255,255,.15);border-radius:20px;padding:4px 11px;font-size:.8rem;font-weight:700;color:#fff;display:flex;align-items:center;gap:.3rem}
+.streak-pill{background:rgba(255,213,0,.2);border:1.5px solid rgba(255,213,0,.4);border-radius:20px;padding:4px 10px;font-size:.8rem;font-weight:700;color:var(--yellow)}
+.user-btn{background:rgba(255,255,255,.12);border:1.5px solid rgba(255,255,255,.2);border-radius:20px;padding:4px 10px;font-size:.8rem;color:rgba(255,255,255,.85);cursor:pointer;font-family:inherit;transition:.15s}
+.user-btn:hover{background:rgba(255,255,255,.2)}
+
+/* CONTENT */
+.content{padding:1.1rem 1.1rem 5.5rem;flex:1}
+.screen{display:none}.screen.active{display:block}
+
+/* BOTTOM NAV */
+.botnav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;background:#fff;border-top:1.5px solid var(--gray2);display:flex;z-index:20;padding-bottom:env(safe-area-inset-bottom,0)}
+.bn-item{flex:1;display:flex;flex-direction:column;align-items:center;padding:.55rem .25rem .45rem;cursor:pointer;border:none;background:transparent;font-family:inherit;color:var(--gray3);gap:2px;transition:color .15s}
+.bn-item.active{color:var(--purple)}
+.bn-icon{font-size:1.5rem;line-height:1}
+.bn-lbl{font-size:.6rem;font-weight:700;text-transform:uppercase;letter-spacing:.04em}
+
+/* ── HOME ── */
+.greeting{font-size:1.5rem;font-weight:800;color:var(--purple);margin-bottom:.15rem}
+.greeting-sub{font-size:.88rem;color:var(--gray3);margin-bottom:1.25rem}
+.stat-row{display:grid;grid-template-columns:1fr 1fr;gap:.6rem;margin-bottom:1.25rem}
+.stat-box{background:#fff;border-radius:var(--radius);padding:.9rem 1rem;border:2px solid var(--gray2);position:relative;overflow:hidden}
+.stat-box::before{content:'';position:absolute;top:-10px;right:-10px;width:50px;height:50px;border-radius:50%;opacity:.12}
+.stat-box.purple::before{background:var(--purple)}
+.stat-box.green::before{background:var(--green)}
+.stat-box.orange::before{background:var(--orange)}
+.stat-box.pink::before{background:var(--pink)}
+.stat-num{font-size:2rem;font-weight:800;color:var(--text);line-height:1}
+.stat-lbl{font-size:.72rem;color:var(--gray3);font-weight:600;text-transform:uppercase;letter-spacing:.04em;margin-top:3px}
+.section-title{font-size:.72rem;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--gray3);margin-bottom:.65rem}
+.module-grid{display:grid;grid-template-columns:1fr 1fr;gap:.65rem;margin-bottom:1.25rem}
+.mod-card{background:#fff;border:2px solid var(--gray2);border-radius:var(--radius);padding:1.1rem .9rem;cursor:pointer;transition:.15s;text-align:center}
+.mod-card:hover{transform:translateY(-2px);border-color:var(--purple)}
+.mod-card:active{transform:scale(.96)}
+.mod-emoji{font-size:2rem;margin-bottom:.4rem}
+.mod-title{font-size:.88rem;font-weight:700;color:var(--text);margin-bottom:.15rem}
+.mod-desc{font-size:.72rem;color:var(--gray3)}
+.prog-card{background:#fff;border:2px solid var(--gray2);border-radius:var(--radius);padding:.9rem 1rem;margin-bottom:.6rem}
+.prog-row{display:flex;justify-content:space-between;margin-bottom:.45rem}
+.prog-lbl{font-size:.82rem;font-weight:600;color:var(--text)}
+.prog-pct{font-size:.82rem;color:var(--gray3);font-weight:600}
+.prog-bar{background:var(--gray1);border-radius:20px;height:8px;overflow:hidden}
+.prog-fill{height:100%;border-radius:20px;transition:width .5s cubic-bezier(.4,0,.2,1)}
+.prog-fill.purple{background:linear-gradient(90deg,var(--purple-lt),var(--purple))}
+.prog-fill.green{background:linear-gradient(90deg,var(--green-lt),var(--green))}
+
+/* ── FLASHCARDS ── */
+.cat-scroll{display:flex;gap:.45rem;overflow-x:auto;padding-bottom:.4rem;margin-bottom:.85rem;scrollbar-width:none}
+.cat-scroll::-webkit-scrollbar{display:none}
+.cat-chip{flex-shrink:0;padding:6px 14px;border-radius:20px;border:2px solid var(--gray2);background:#fff;font-size:.78rem;font-weight:600;cursor:pointer;color:var(--gray3);transition:.12s;font-family:inherit}
+.cat-chip.active{background:var(--purple);border-color:var(--purple);color:#fff}
+.word-ctr{text-align:center;font-size:.78rem;color:var(--gray3);font-weight:600;margin-bottom:.65rem}
+
+/* THE CARD */
+.card-wrap{perspective:1000px;margin-bottom:1rem;height:240px}
+.card-inner{position:relative;width:100%;height:100%;transition:transform .5s cubic-bezier(.4,0,.2,1);transform-style:preserve-3d}
+.card-inner.flipped{transform:rotateY(180deg)}
+.card-face{position:absolute;width:100%;height:100%;backface-visibility:hidden;border-radius:20px;border:2.5px solid var(--gray2);background:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:1.5rem;box-shadow:0 4px 20px rgba(76,59,207,.1);cursor:pointer}
+.card-face.back{transform:rotateY(180deg);background:linear-gradient(135deg,#F0EEF8 0%,#fff 100%)}
+.card-cat-badge{position:absolute;top:1rem;left:1rem;font-size:.68rem;font-weight:700;background:var(--gray1);color:var(--purple);padding:3px 9px;border-radius:20px;text-transform:uppercase;letter-spacing:.04em}
+.card-learned{position:absolute;top:1rem;right:1rem;font-size:.75rem;font-weight:700;color:var(--green);display:none}
+.card-type{font-size:.72rem;text-transform:uppercase;letter-spacing:.06em;color:var(--gray3);margin-bottom:.4rem}
+.card-es{font-size:2.4rem;font-weight:800;color:var(--purple);letter-spacing:-.5px;line-height:1.1;text-align:center;margin-bottom:.2rem}
+.card-nl{font-size:1.4rem;font-weight:700;color:var(--green);margin-bottom:.4rem;text-align:center}
+.card-hint{font-size:.8rem;color:var(--gray3);text-align:center;font-style:italic;max-width:200px;line-height:1.4}
+.card-tap{font-size:.75rem;color:var(--gray2);margin-top:.75rem;font-weight:500}
+
+.ans-btns{display:flex;gap:.6rem;margin-bottom:.6rem;display:none}
+.flip-btns{display:flex;gap:.6rem;margin-bottom:.6rem}
+.btn{flex:1;padding:.8rem;border-radius:var(--radius-sm);border:2.5px solid var(--gray2);background:#fff;font-size:.9rem;font-weight:700;cursor:pointer;font-family:inherit;color:var(--text);transition:.12s}
+.btn:active{transform:scale(.96)}
+.btn.ok{background:#E8FBF5;border-color:var(--green);color:var(--green)}
+.btn.fail{background:#FFF0F0;border-color:var(--red);color:var(--red)}
+.btn.primary{background:var(--purple);border-color:var(--purple);color:#fff}
+.btn.ghost{background:var(--gray1);border-color:var(--gray2);color:var(--gray3)}
+
+/* ── ZINNEN ── */
+.sent-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:.65rem}
+.sent-num{font-size:.78rem;color:var(--gray3);font-weight:600}
+.sent-progress{background:var(--gray1);border-radius:20px;height:6px;margin-bottom:.85rem;overflow:hidden}
+.sent-prog-fill{height:100%;background:linear-gradient(90deg,var(--purple-lt),var(--purple));border-radius:20px;transition:width .4s}
+.sent-card{background:#fff;border:2.5px solid var(--gray2);border-radius:var(--radius);padding:1rem 1.1rem;margin-bottom:.75rem}
+.sent-label{font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--gray3);margin-bottom:.35rem}
+.sent-nl{font-size:1.05rem;font-weight:700;color:var(--text);line-height:1.4}
+.sent-tip{font-size:.78rem;color:var(--purple-lt);margin-top:.4rem}
+.ans-zone{background:var(--gray1);border-radius:var(--radius-sm);min-height:54px;padding:.6rem .7rem;margin-bottom:.6rem;display:flex;flex-wrap:wrap;gap:5px;align-content:flex-start;border:2.5px dashed var(--gray2);transition:border-color .15s}
+.ans-zone.active{border-color:var(--purple);border-style:solid}
+.pool-area{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:.7rem}
+.chip{padding:7px 13px;border-radius:8px;font-size:.84rem;font-weight:600;cursor:pointer;user-select:none;transition:.12s;font-family:inherit;border:2px solid}
+.chip:active{transform:scale(.92)}
+.chip.pool-chip{background:#fff;border-color:var(--gray2);color:var(--text)}
+.chip.pool-chip.used{opacity:.28;pointer-events:none}
+.chip.ans-chip{background:#EDE9FF;border-color:var(--purple-lt);color:var(--purple)}
+.sent-fb{padding:.75rem 1rem;border-radius:var(--radius-sm);font-size:.88rem;font-weight:600;margin-bottom:.7rem;display:none}
+.sent-fb.ok{background:#E8FBF5;color:#007A60;border:1.5px solid #9FE1CB}
+.sent-fb.fail{background:#FFF0F0;color:#C0392B;border:1.5px solid #F5C4B3}
+
+/* ── SPREKEN ── */
+.speak-card{background:linear-gradient(135deg,var(--purple) 0%,var(--purple-lt) 100%);border-radius:20px;padding:2rem 1.5rem;text-align:center;margin-bottom:.75rem;box-shadow:0 6px 24px rgba(76,59,207,.25)}
+.sp-counter{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:rgba(255,255,255,.55);margin-bottom:1rem}
+.sp-es{font-size:2rem;font-weight:800;color:#fff;margin-bottom:.3rem;letter-spacing:-.3px}
+.sp-nl{font-size:1rem;color:rgba(255,255,255,.65);margin-bottom:1rem}
+.sp-example{background:rgba(255,255,255,.12);border-radius:var(--radius-sm);padding:.5rem .85rem;font-size:.82rem;color:rgba(255,255,255,.8);font-style:italic}
+.sp-tip{background:#fff;border:2px solid var(--gray2);border-radius:var(--radius);padding:.9rem 1rem;font-size:.84rem;color:var(--gray3);line-height:1.5;margin-bottom:.75rem}
+.sp-tip strong{color:var(--purple)}
+.audio-btn{width:100%;padding:.85rem;border-radius:var(--radius-sm);border:2.5px solid;font-size:.92rem;font-weight:700;cursor:pointer;font-family:inherit;transition:.12s;margin-bottom:.55rem;display:flex;align-items:center;justify-content:center;gap:.5rem}
+.audio-btn:active{transform:scale(.98)}
+.ab-listen{background:#EDE9FF;border-color:var(--purple-lt);color:var(--purple)}
+.ab-speak{background:var(--purple);border-color:var(--purple);color:#fff}
+.ab-speaking{background:var(--red);border-color:var(--red);color:#fff;animation:pulse 1s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.7}}
+.sp-result{padding:.75rem 1rem;border-radius:var(--radius-sm);font-size:.88rem;font-weight:600;margin-bottom:.7rem;display:none}
+.sp-result.ok{background:#E8FBF5;color:#007A60;border:1.5px solid #9FE1CB}
+.sp-result.fail{background:#FFF0F0;color:#C0392B;border:1.5px solid #F5C4B3}
+.nav-row{display:flex;gap:.6rem}
+
+/* ── GRAMMATICA ── */
+.gr-card{background:#fff;border:2.5px solid var(--gray2);border-radius:var(--radius);overflow:hidden;margin-bottom:.65rem}
+.gr-hdr{display:flex;align-items:center;gap:.65rem;padding:.85rem 1rem;cursor:pointer;user-select:none;transition:background .15s}
+.gr-hdr:hover{background:var(--gray1)}
+.gr-icon{font-size:1.35rem}
+.gr-title{font-size:.92rem;font-weight:700;color:var(--text);flex:1}
+.gr-badge{font-size:.68rem;background:var(--gray1);color:var(--gray3);padding:2px 8px;border-radius:10px;font-weight:600}
+.gr-chevron{font-size:.7rem;color:var(--gray3);transition:transform .2s}
+.gr-card.open .gr-chevron{transform:rotate(180deg)}
+.gr-body{display:none;padding:0 1rem 1rem}
+.gr-card.open .gr-body{display:block}
+.gr-explain{font-size:.84rem;color:var(--gray3);line-height:1.55;margin-bottom:.65rem;padding-top:.65rem;border-top:1.5px solid var(--gray1)}
+.gr-table{width:100%;border-collapse:collapse;font-size:.8rem;margin-bottom:.65rem}
+.gr-table th{text-align:left;font-size:.68rem;text-transform:uppercase;letter-spacing:.05em;color:var(--gray3);padding:.3rem .35rem;border-bottom:1.5px solid var(--gray1);font-weight:700}
+.gr-table td{padding:.4rem .35rem;border-bottom:1px solid var(--gray1);color:var(--text);vertical-align:top}
+.gr-table td:first-child{color:var(--gray3);font-weight:600;white-space:nowrap}
+.gr-table td:nth-child(2){font-weight:700;color:var(--purple)}
+.gr-tip{background:#FFF8D6;border-left:3.5px solid var(--yellow);padding:.6rem .85rem;border-radius:0 var(--radius-sm) var(--radius-sm) 0;font-size:.8rem;color:var(--gray3);line-height:1.5}
+
+/* ── CONFETTI ── */
+.confetti-wrap{position:fixed;top:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;height:100%;pointer-events:none;z-index:999;overflow:hidden}
+.confetto{position:absolute;top:-10px;width:10px;height:10px;opacity:0;border-radius:2px}
+
+/* ── TOAST ── */
+.toast{position:fixed;bottom:5.5rem;left:50%;transform:translateX(-50%) translateY(10px);background:var(--purple);color:#fff;padding:.6rem 1.4rem;border-radius:20px;font-size:.85rem;font-weight:700;opacity:0;transition:.2s;pointer-events:none;z-index:200;white-space:nowrap;box-shadow:0 4px 16px rgba(76,59,207,.35)}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+</style>
+</head>
+<body>
+
+<!-- CONFETTI CONTAINER -->
+<div class="confetti-wrap" id="confetti-wrap"></div>
+
+<!-- LOGIN -->
+<div id="login">
+  <div class="login-flag">🇪🇸</div>
+  <div class="login-title">SpanishGo</div>
+  <div class="login-tagline">Gratis Spaans leren • Tonito & Arjette</div>
+  <div class="user-row" id="user-row"></div>
+  <div class="or-divider">— of nieuw profiel —</div>
+  <div class="new-form">
+    <input type="text" id="new-name" placeholder="Jouw naam..." maxlength="20">
+    <button class="btn-start" onclick="loginNew()">Start →</button>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app">
+  <div class="topbar">
+    <div class="tb-logo">🇪🇸 SpanishGo</div>
+    <div class="tb-right">
+      <div class="streak-pill" id="tb-streak">🔥 0</div>
+      <div class="xp-pill" id="tb-xp">⭐ 0</div>
+      <button class="user-btn" id="tb-user" onclick="switchUser()">—</button>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <!-- HOME -->
+    <div id="sc-home" class="screen">
+      <div class="greeting" id="home-greeting">¡Hola!</div>
+      <div class="greeting-sub">Wat ga je vandaag leren?</div>
+      <div class="stat-row">
+        <div class="stat-box purple"><div class="stat-num" id="sh-words">0</div><div class="stat-lbl">Woorden geleerd</div></div>
+        <div class="stat-box green"><div class="stat-num" id="sh-streak">0</div><div class="stat-lbl">Dagen op rij 🔥</div></div>
+        <div class="stat-box orange"><div class="stat-num" id="sh-xp">0</div><div class="stat-lbl">XP punten ⭐</div></div>
+        <div class="stat-box pink"><div class="stat-num" id="sh-sent">0</div><div class="stat-lbl">Zinnen correct ✓</div></div>
+      </div>
+      <div class="section-title">Oefeningen</div>
+      <div class="module-grid">
+        <div class="mod-card" onclick="go('words')"><div class="mod-emoji">🃏</div><div class="mod-title">Woorden</div><div class="mod-desc">70 flashcards</div></div>
+        <div class="mod-card" onclick="go('sentences')"><div class="mod-emoji">✍️</div><div class="mod-title">Zinnen</div><div class="mod-desc">Bouw zinnen</div></div>
+        <div class="mod-card" onclick="go('speak')"><div class="mod-emoji">🎤</div><div class="mod-title">Spreken</div><div class="mod-desc">Uitspraak</div></div>
+        <div class="mod-card" onclick="go('grammar')"><div class="mod-emoji">📖</div><div class="mod-title">Grammatica</div><div class="mod-desc">Regels & uitleg</div></div>
+      </div>
+      <div class="section-title">Voortgang</div>
+      <div class="prog-card">
+        <div class="prog-row"><span class="prog-lbl">Woordenschat</span><span class="prog-pct" id="ph-wp">0%</span></div>
+        <div class="prog-bar"><div class="prog-fill purple" id="ph-wf" style="width:0%"></div></div>
+      </div>
+      <div class="prog-card">
+        <div class="prog-row"><span class="prog-lbl">Zinnen</span><span class="prog-pct" id="ph-sp">0%</span></div>
+        <div class="prog-bar"><div class="prog-fill green" id="ph-sf" style="width:0%"></div></div>
+      </div>
+    </div>
+
+    <!-- WOORDEN -->
+    <div id="sc-words" class="screen">
+      <div class="cat-scroll" id="cat-scroll"></div>
+      <div class="word-ctr" id="word-ctr"></div>
+      <div class="card-wrap">
+        <div class="card-inner" id="card-inner" onclick="flipCard()">
+          <div class="card-face front">
+            <span class="card-cat-badge" id="c-cat">Begroetingen</span>
+            <span class="card-learned" id="c-learned">✓ geleerd</span>
+            <div class="card-type" id="c-type">uitdrukking</div>
+            <div class="card-es" id="c-es">hola</div>
+            <div class="card-tap" id="c-tap">Tik om te omdraaien</div>
+          </div>
+          <div class="card-face back">
+            <span class="card-cat-badge" id="c-cat2">Begroetingen</span>
+            <div class="card-nl" id="c-nl">hallo</div>
+            <div class="card-hint" id="c-hint"></div>
+          </div>
+        </div>
+      </div>
+      <div class="ans-btns" id="ans-btns">
+        <button class="btn fail" onclick="answerWord(false)">✗ Wist ik niet</button>
+        <button class="btn ok" onclick="answerWord(true)">✓ Wist ik wel</button>
+      </div>
+      <div class="flip-btns" id="flip-btns">
+        <button class="btn ghost" onclick="skipWord()">Overslaan</button>
+        <button class="btn primary" onclick="flipCard()">Toon antwoord</button>
+      </div>
+    </div>
+
+    <!-- ZINNEN -->
+    <div id="sc-sentences" class="screen">
+      <div class="sent-hdr">
+        <div class="section-title" style="margin:0">Zinnen bouwen</div>
+        <div class="sent-num" id="s-num">1 / 20</div>
+      </div>
+      <div class="sent-progress"><div class="sent-prog-fill" id="s-prog" style="width:5%"></div></div>
+      <div class="sent-card">
+        <div class="sent-label">Vertaal naar Spaans</div>
+        <div class="sent-nl" id="s-nl">—</div>
+        <div class="sent-tip" id="s-tip"></div>
+      </div>
+      <div style="font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--gray3);margin-bottom:.3rem">Jouw antwoord <span style="text-transform:none;font-weight:400">(tik om te verwijderen)</span></div>
+      <div class="ans-zone" id="ans-zone"></div>
+      <div style="font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--gray3);margin-bottom:.35rem">Kies woorden</div>
+      <div class="pool-area" id="pool-area"></div>
+      <div class="sent-fb" id="s-fb"></div>
+      <div style="display:flex;gap:.55rem;margin-bottom:.5rem">
+        <button class="btn ghost" onclick="clearSent()" style="flex:.55">Wissen</button>
+        <button class="btn primary" onclick="checkSent()">Controleer ✓</button>
+      </div>
+      <button class="btn" style="width:100%" onclick="nextSent()">Volgende →</button>
+    </div>
+
+    <!-- SPREKEN -->
+    <div id="sc-speak" class="screen">
+      <div class="speak-card">
+        <div class="sp-counter" id="sp-ctr">1 / 12</div>
+        <div class="sp-es" id="sp-es">Hola</div>
+        <div class="sp-nl" id="sp-nl">Hallo</div>
+        <div class="sp-example" id="sp-ex"></div>
+      </div>
+      <div class="sp-tip" id="sp-tip"></div>
+      <button class="audio-btn ab-listen" onclick="playAudio()">🔊 Luister uitspraak</button>
+      <button class="audio-btn ab-speak" id="rec-btn" onclick="startRecord()">🎤 Spreek na</button>
+      <div class="sp-result" id="sp-result"></div>
+      <div class="nav-row">
+        <button class="btn ghost" onclick="prevSpeak()" style="flex:.55">← Vorige</button>
+        <button class="btn primary" onclick="nextSpeak()">Volgende →</button>
+      </div>
+    </div>
+
+    <!-- GRAMMATICA -->
+    <div id="sc-grammar" class="screen">
+      <div class="section-title" style="margin-bottom:.75rem">Grammatica uitleg</div>
+      <div id="gr-list"></div>
+    </div>
+
+  </div>
+
+  <nav class="botnav">
+    <button class="bn-item active" data-sc="home" onclick="go('home')"><span class="bn-icon">🏠</span><span class="bn-lbl">Home</span></button>
+    <button class="bn-item" data-sc="words" onclick="go('words')"><span class="bn-icon">🃏</span><span class="bn-lbl">Woorden</span></button>
+    <button class="bn-item" data-sc="sentences" onclick="go('sentences')"><span class="bn-icon">✍️</span><span class="bn-lbl">Zinnen</span></button>
+    <button class="bn-item" data-sc="speak" onclick="go('speak')"><span class="bn-icon">🎤</span><span class="bn-lbl">Spreken</span></button>
+    <button class="bn-item" data-sc="grammar" onclick="go('grammar')"><span class="bn-icon">📖</span><span class="bn-lbl">Regels</span></button>
+  </nav>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ── DATA ────────────────────────────────────────────────────────────
+const WORDS=[
+  {id:'w01',es:'hola',nl:'hallo',cat:'Begroetingen',type:'uitdrukking',hint:'De "h" is stil. Zeg: oh-la'},
+  {id:'w02',es:'buenos días',nl:'goedemorgen',cat:'Begroetingen',type:'uitdrukking',hint:'Zeg: bweh-nos dee-as'},
+  {id:'w03',es:'buenas tardes',nl:'goedemiddag',cat:'Begroetingen',type:'uitdrukking',hint:'Gebruik na 14:00 uur'},
+  {id:'w04',es:'buenas noches',nl:'goedenavond',cat:'Begroetingen',type:'uitdrukking',hint:'Ook: welterusten'},
+  {id:'w05',es:'adiós',nl:'dag / tot ziens',cat:'Begroetingen',type:'uitdrukking',hint:'Zeg: ah-dee-os'},
+  {id:'w06',es:'hasta luego',nl:'tot later',cat:'Begroetingen',type:'uitdrukking',hint:'Informeel afscheid'},
+  {id:'w07',es:'gracias',nl:'dankjewel',cat:'Beleefdheid',type:'uitdrukking',hint:'Zeg: gra-thee-as'},
+  {id:'w08',es:'de nada',nl:'graag gedaan',cat:'Beleefdheid',type:'uitdrukking',hint:'Antwoord op gracias'},
+  {id:'w09',es:'por favor',nl:'alsjeblieft',cat:'Beleefdheid',type:'uitdrukking',hint:'Zeg: por fa-bor'},
+  {id:'w10',es:'perdón',nl:'pardon / sorry',cat:'Beleefdheid',type:'uitdrukking',hint:'Ook om aandacht te vragen'},
+  {id:'w11',es:'lo siento',nl:'het spijt me',cat:'Beleefdheid',type:'uitdrukking',hint:'Oprechte verontschuldiging'},
+  {id:'w12',es:'yo',nl:'ik',cat:'Voornaamwoorden',type:'voornaamwoord',hint:'Vaak weggelaten in Spaans'},
+  {id:'w13',es:'tú',nl:'jij',cat:'Voornaamwoorden',type:'voornaamwoord',hint:'Informeel. Formeel: usted'},
+  {id:'w14',es:'él / ella',nl:'hij / zij',cat:'Voornaamwoorden',type:'voornaamwoord',hint:'él = hij, ella = zij'},
+  {id:'w15',es:'nosotros',nl:'wij',cat:'Voornaamwoorden',type:'voornaamwoord',hint:'Nosotras voor vrouwelijke groep'},
+  {id:'w16',es:'agua',nl:'water',cat:'Eten & drinken',type:'zelfst. naamwoord',hint:'Vrouwelijk, maar: el agua'},
+  {id:'w17',es:'café',nl:'koffie',cat:'Eten & drinken',type:'zelfst. naamwoord',hint:'Mannelijk: el café'},
+  {id:'w18',es:'pan',nl:'brood',cat:'Eten & drinken',type:'zelfst. naamwoord',hint:'Mannelijk: el pan'},
+  {id:'w19',es:'carne',nl:'vlees',cat:'Eten & drinken',type:'zelfst. naamwoord',hint:'Vrouwelijk: la carne'},
+  {id:'w20',es:'fruta',nl:'fruit',cat:'Eten & drinken',type:'zelfst. naamwoord',hint:'Vrouwelijk: la fruta'},
+  {id:'w21',es:'vino',nl:'wijn',cat:'Eten & drinken',type:'zelfst. naamwoord',hint:'El vino tinto = rode wijn'},
+  {id:'w22',es:'cerveza',nl:'bier',cat:'Eten & drinken',type:'zelfst. naamwoord',hint:'Zeg: ther-veh-tha'},
+  {id:'w23',es:'la cuenta',nl:'de rekening',cat:'Eten & drinken',type:'zelfst. naamwoord',hint:'¡La cuenta, por favor!'},
+  {id:'w24',es:'casa',nl:'huis',cat:'Dagelijks leven',type:'zelfst. naamwoord',hint:'Mi casa es tu casa'},
+  {id:'w25',es:'coche',nl:'auto',cat:'Dagelijks leven',type:'zelfst. naamwoord',hint:'In Latijns-Amerika: carro'},
+  {id:'w26',es:'trabajo',nl:'werk',cat:'Dagelijks leven',type:'zelfst. naamwoord',hint:'Trabajar = werken'},
+  {id:'w27',es:'dinero',nl:'geld',cat:'Dagelijks leven',type:'zelfst. naamwoord',hint:'Mannelijk: el dinero'},
+  {id:'w28',es:'tienda',nl:'winkel',cat:'Dagelijks leven',type:'zelfst. naamwoord',hint:'Vrouwelijk: la tienda'},
+  {id:'w29',es:'ciudad',nl:'stad',cat:'Dagelijks leven',type:'zelfst. naamwoord',hint:'Zeg: thee-oo-dad'},
+  {id:'w30',es:'calle',nl:'straat',cat:'Dagelijks leven',type:'zelfst. naamwoord',hint:'La calle = de straat'},
+  {id:'w31',es:'amigo',nl:'vriend',cat:'Mensen',type:'zelfst. naamwoord',hint:'Amiga = vriendin'},
+  {id:'w32',es:'familia',nl:'familie',cat:'Mensen',type:'zelfst. naamwoord',hint:'Vrouwelijk: la familia'},
+  {id:'w33',es:'madre',nl:'moeder',cat:'Mensen',type:'zelfst. naamwoord',hint:'Informeel: mamá'},
+  {id:'w34',es:'padre',nl:'vader',cat:'Mensen',type:'zelfst. naamwoord',hint:'Informeel: papá'},
+  {id:'w35',es:'novio / novia',nl:'vriend/vriendin (relatie)',cat:'Mensen',type:'zelfst. naamwoord',hint:'novio = vriend, novia = vriendin'},
+  {id:'w36',es:'hablar',nl:'praten / spreken',cat:'Werkwoorden',type:'werkwoord',hint:'-ar: hablo, hablas, habla...'},
+  {id:'w37',es:'comer',nl:'eten',cat:'Werkwoorden',type:'werkwoord',hint:'-er: como, comes, come...'},
+  {id:'w38',es:'beber',nl:'drinken',cat:'Werkwoorden',type:'werkwoord',hint:'-er: bebo, bebes, bebe...'},
+  {id:'w39',es:'ir',nl:'gaan',cat:'Werkwoorden',type:'werkwoord',hint:'Onregelmatig: voy, vas, va...'},
+  {id:'w40',es:'ser',nl:'zijn (permanent)',cat:'Werkwoorden',type:'werkwoord',hint:'soy, eres, es... (identiteit)'},
+  {id:'w41',es:'estar',nl:'zijn (tijdelijk)',cat:'Werkwoorden',type:'werkwoord',hint:'estoy, estás, está... (toestand)'},
+  {id:'w42',es:'tener',nl:'hebben',cat:'Werkwoorden',type:'werkwoord',hint:'tengo, tienes, tiene...'},
+  {id:'w43',es:'querer',nl:'willen / houden van',cat:'Werkwoorden',type:'werkwoord',hint:'quiero, quieres, quiere...'},
+  {id:'w44',es:'poder',nl:'kunnen',cat:'Werkwoorden',type:'werkwoord',hint:'puedo, puedes, puede...'},
+  {id:'w45',es:'vivir',nl:'leven / wonen',cat:'Werkwoorden',type:'werkwoord',hint:'-ir: vivo, vives, vive...'},
+  {id:'w46',es:'grande',nl:'groot',cat:'Bijvoeglijk',type:'bijv. naamwoord',hint:'Gran voor de naam: un gran hombre'},
+  {id:'w47',es:'pequeño',nl:'klein',cat:'Bijvoeglijk',type:'bijv. naamwoord',hint:'Pequeña voor vrouwelijke woorden'},
+  {id:'w48',es:'bueno',nl:'goed',cat:'Bijvoeglijk',type:'bijv. naamwoord',hint:'Buena voor vrouwelijke woorden'},
+  {id:'w49',es:'malo',nl:'slecht',cat:'Bijvoeglijk',type:'bijv. naamwoord',hint:'Mala voor vrouwelijke woorden'},
+  {id:'w50',es:'bonito',nl:'mooi',cat:'Bijvoeglijk',type:'bijv. naamwoord',hint:'Bonita voor vrouwelijke woorden'},
+  {id:'w51',es:'cansado',nl:'moe',cat:'Bijvoeglijk',type:'bijv. naamwoord',hint:'Cansada voor vrouwelijke woorden'},
+  {id:'w52',es:'feliz',nl:'gelukkig / blij',cat:'Bijvoeglijk',type:'bijv. naamwoord',hint:'Onveranderlijk voor geslacht'},
+  {id:'w53',es:'uno',nl:'één',cat:'Getallen',type:'telwoord',hint:'Un (m.) / una (v.) voor zelfst. naamw.'},
+  {id:'w54',es:'dos',nl:'twee',cat:'Getallen',type:'telwoord',hint:''},
+  {id:'w55',es:'tres',nl:'drie',cat:'Getallen',type:'telwoord',hint:''},
+  {id:'w56',es:'diez',nl:'tien',cat:'Getallen',type:'telwoord',hint:'Zeg: dee-eth'},
+  {id:'w57',es:'veinte',nl:'twintig',cat:'Getallen',type:'telwoord',hint:'Zeg: bayn-teh'},
+  {id:'w58',es:'cien',nl:'honderd',cat:'Getallen',type:'telwoord',hint:'Ciento voor 101+'},
+  {id:'w59',es:'hoy',nl:'vandaag',cat:'Tijd',type:'bijwoord',hint:'Hoy es lunes = Vandaag is maandag'},
+  {id:'w60',es:'mañana',nl:'morgen / ochtend',cat:'Tijd',type:'bijwoord',hint:'Context bepaalt de betekenis'},
+  {id:'w61',es:'ayer',nl:'gisteren',cat:'Tijd',type:'bijwoord',hint:'Ayer fue... = Gisteren was...'},
+  {id:'w62',es:'ahora',nl:'nu',cat:'Tijd',type:'bijwoord',hint:'Ahora mismo = op dit moment'},
+  {id:'w63',es:'siempre',nl:'altijd',cat:'Tijd',type:'bijwoord',hint:'Siempre te quiero'},
+  {id:'w64',es:'nunca',nl:'nooit',cat:'Tijd',type:'bijwoord',hint:'Nunca más = nooit meer'},
+  {id:'w65',es:'¿qué?',nl:'wat?',cat:'Vragen',type:'vraagwoord',hint:'¿Qué es esto? = Wat is dit?'},
+  {id:'w66',es:'¿dónde?',nl:'waar?',cat:'Vragen',type:'vraagwoord',hint:'¿Dónde estás? = Waar ben je?'},
+  {id:'w67',es:'¿cuánto?',nl:'hoeveel?',cat:'Vragen',type:'vraagwoord',hint:'¿Cuánto cuesta? = Hoeveel kost het?'},
+  {id:'w68',es:'¿cómo?',nl:'hoe?',cat:'Vragen',type:'vraagwoord',hint:'¿Cómo te llamas? = Hoe heet je?'},
+  {id:'w69',es:'¿por qué?',nl:'waarom?',cat:'Vragen',type:'vraagwoord',hint:'Porque = omdat (antwoord)'},
+  {id:'w70',es:'¿quién?',nl:'wie?',cat:'Vragen',type:'vraagwoord',hint:'¿Quién eres? = Wie ben jij?'},
+];
+
+const SENTENCES=[
+  {nl:'Ik heet Tonito.',es:'Me llamo Tonito.',words:['Me','llamo','Tonito','.'],extra:['Yo','soy','hola','gracias','estoy'],tip:'Me llamo = Ik heet (letterlijk: ik noem mezelf)'},
+  {nl:'Goedemorgen! Hoe heet jij?',es:'¡Buenos días! ¿Cómo te llamas?',words:['¡Buenos','días!','¿Cómo','te','llamas?'],extra:['hola','gracias','bien','estás'],tip:'¿Cómo te llamas? = letterlijk: hoe noem je jezelf?'},
+  {nl:'Ik wil water, alsjeblieft.',es:'Quiero agua, por favor.',words:['Quiero','agua',',','por','favor','.'],extra:['comer','grande','hoy','beber'],tip:'Quiero komt van querer = willen'},
+  {nl:'Mijn huis is groot.',es:'Mi casa es grande.',words:['Mi','casa','es','grande','.'],extra:['pequeño','trabajo','familia','está'],tip:'Mi = mijn. Es = is (ser, permanent)'},
+  {nl:'Heb jij een auto?',es:'¿Tienes un coche?',words:['¿Tienes','un','coche?'],extra:['agua','ir','hola','grande','la'],tip:'Tienes = jij hebt (tener)'},
+  {nl:'Vandaag werk ik.',es:'Hoy trabajo.',words:['Hoy','trabajo','.'],extra:['mañana','grande','casa','bueno','yo'],tip:'Trabajo = ik werk. Voornaamwoord wordt weggelaten'},
+  {nl:'Jij spreekt goed Spaans.',es:'Hablas bien español.',words:['Hablas','bien','español','.'],extra:['grande','familia','ir','tú'],tip:'Hablas = jij spreekt. tú is optioneel'},
+  {nl:'Ik eet met mijn familie.',es:'Como con mi familia.',words:['Como','con','mi','familia','.'],extra:['trabajo','grande','ir','hoy'],tip:'Con = met. Como = ik eet (comer)'},
+  {nl:'Dankjewel, vriend!',es:'¡Gracias, amigo!',words:['¡Gracias',',','amigo!'],extra:['hola','agua','bueno','coche'],tip:'Amiga voor een vriendin'},
+  {nl:'Ik ga naar huis.',es:'Voy a casa.',words:['Voy','a','casa','.'],extra:['trabajo','grande','familia','comer'],tip:'Voy = ik ga (ir). A = naar'},
+  {nl:'Waar is de winkel?',es:'¿Dónde está la tienda?',words:['¿Dónde','está','la','tienda?'],extra:['es','mi','grande','calle'],tip:'Está (estar) voor locatie, niet es (ser)'},
+  {nl:'Ik woon in de stad.',es:'Vivo en la ciudad.',words:['Vivo','en','la','ciudad','.'],extra:['trabajo','casa','ir','grande'],tip:'Vivo = ik woon (vivir). En = in'},
+  {nl:'Hij drinkt koffie.',es:'Él bebe café.',words:['Él','bebe','café','.'],extra:['agua','ella','yo','tú'],tip:'Bebe = hij/zij drinkt (beber)'},
+  {nl:'Ik houd van jou.',es:'Te quiero.',words:['Te','quiero','.'],extra:['yo','tú','mucho','bien'],tip:'Quiero = ik wil / ik houd van. Te = jou'},
+  {nl:'Hoeveel kost dit?',es:'¿Cuánto cuesta esto?',words:['¿Cuánto','cuesta','esto?'],extra:['qué','dónde','grande','tienda'],tip:'Cuesta = het kost (costar)'},
+  {nl:'Ik ben moe maar blij.',es:'Estoy cansado pero feliz.',words:['Estoy','cansado','pero','feliz','.'],extra:['soy','grande','bueno','malo'],tip:'Estoy (estar) voor tijdelijke toestand. Pero = maar'},
+  {nl:'Kan jij Spaans spreken?',es:'¿Puedes hablar español?',words:['¿Puedes','hablar','español?'],extra:['quieres','bien','grande','tú'],tip:'Puedes = jij kunt (poder). Hablar = spreken'},
+  {nl:'De rekening graag.',es:'La cuenta, por favor.',words:['La','cuenta',',','por','favor','.'],extra:['el','agua','grande','tienda'],tip:'Essentieel in een restaurant!'},
+  {nl:'Morgen ga ik werken.',es:'Mañana voy a trabajar.',words:['Mañana','voy','a','trabajar','.'],extra:['hoy','ayer','ir','trabajo'],tip:'Voy a + infinitief = toekomst'},
+  {nl:'Wij hebben geld.',es:'Tenemos dinero.',words:['Tenemos','dinero','.'],extra:['tengo','trabajo','grande','mucho'],tip:'Tenemos = wij hebben (tener)'},
+];
+
+const SPEAK_ITEMS=[
+  {es:'Hola',nl:'Hallo',tip:'De "h" is stil in het Spaans. Zeg gewoon: "oh-la"',example:'¡Hola! ¿Cómo estás?'},
+  {es:'Gracias',nl:'Dankjewel',tip:'In Spanje: "gra-thee-as". In Latijns-Amerika: "gra-see-as"',example:'Muchas gracias = heel erg bedankt'},
+  {es:'Buenos días',nl:'Goedemorgen',tip:'"bweh-nos dee-as". De "ue" klinkt als "we"',example:'Gebruik tot ca. 12:00 uur'},
+  {es:'Por favor',nl:'Alsjeblieft',tip:'"por fa-bor". De Spaanse "v" klinkt als een zachte "b"',example:'¿Agua, por favor?'},
+  {es:'¿Cómo estás?',nl:'Hoe gaat het?',tip:'"ko-mo es-tas". De "ó" is beklemtoond en iets langer',example:'Bien, gracias = Goed, dankjewel'},
+  {es:'Me llamo',nl:'Ik heet',tip:'"ll" klinkt als "j" (Spanje) of "y" (Latijns-Am.)',example:'Me llamo Arjette. ¿Y tú?'},
+  {es:'Mucho gusto',nl:'Aangenaam',tip:'"moo-cho goos-to". Gebruik bij eerste ontmoeting',example:'Mucho gusto, soy Tonito'},
+  {es:'¿Dónde está?',nl:'Waar is?',tip:'"don-deh es-ta". De "ó" is beklemtoond',example:'¿Dónde está el baño?'},
+  {es:'Quiero',nl:'Ik wil',tip:'"kee-eh-ro". Onregelmatig werkwoord',example:'Quiero un café, por favor'},
+  {es:'No entiendo',nl:'Ik begrijp het niet',tip:'"no en-tyen-do". Levensreddend voor beginners!',example:'¿Puede repetir? = Kunt u herhalen?'},
+  {es:'Habla más despacio',nl:'Spreek langzamer',tip:'"a-bla mas des-pa-thee-o"',example:'Zeg dit als iemand te snel praat'},
+  {es:'¿Cuánto cuesta?',nl:'Hoeveel kost het?',tip:'"kwan-to kwes-ta"',example:'Essentieel voor winkelen'},
+];
+
+const GRAMMAR=[
+  {title:'De lidwoorden: el, la, los, las',icon:'📖',table:[{t:'Mannelijk enkelvoud',w:'el',e:'el coche (de auto)'},{t:'Vrouwelijk enkelvoud',w:'la',e:'la casa (het huis)'},{t:'Mannelijk meervoud',w:'los',e:'los coches (de autos)'},{t:'Vrouwelijk meervoud',w:'las',e:'las casas (de huizen)'}],explain:'Elk Spaans zelfstandig naamwoord heeft een geslacht: mannelijk of vrouwelijk. Het lidwoord past zich aan.',tip:'Woorden op -o zijn vaak mannelijk, op -a vrouwelijk. Leer het lidwoord samen met het woord!'},
+  {title:'Ser vs. Estar: twee keer "zijn"',icon:'⚖️',table:[{t:'SER — identiteit',w:'soy, eres, es',e:'Soy holandés (Ik ben Nederlander)'},{t:'SER — permanent',w:'somos, sois, son',e:'Es médico (Hij is arts)'},{t:'ESTAR — toestand',w:'estoy, estás, está',e:'Estoy cansado (Ik ben moe)'},{t:'ESTAR — locatie',w:'estamos, estáis, están',e:'Está en casa (Hij is thuis)'}],explain:'Het Nederlands heeft één "zijn", het Spaans heeft er twee. Dit is een van de grootste uitdagingen voor beginners.',tip:'SER = wie/wat je bent. ESTAR = hoe je je voelt of waar je bent.'},
+  {title:'Werkwoorden vervoegen (-ar)',icon:'🔧',table:[{t:'yo',w:'hablo',e:'Hablo español'},{t:'tú',w:'hablas',e:'¿Hablas español?'},{t:'él / ella',w:'habla',e:'Ella habla rápido'},{t:'nosotros',w:'hablamos',e:'Hablamos mucho'},{t:'ellos',w:'hablan',e:'Hablan bien'}],explain:'Spaanse werkwoorden eindigen op -ar, -er of -ir. De uitgang verandert per persoon. Hier hablar (praten):',tip:'De persoonsvorm vervangt het voornaamwoord: vaker "hablo" dan "yo hablo".'},
+  {title:'Getallen 1 t/m 20',icon:'🔢',table:[{t:'1–5',w:'uno, dos, tres, cuatro, cinco',e:'Cinco cafés, por favor'},{t:'6–10',w:'seis, siete, ocho, nueve, diez',e:'Diez euros'},{t:'11–15',w:'once, doce, trece, catorce, quince',e:'Quince minutos'},{t:'16–20',w:'dieciséis...veinte',e:'Veinte personas'}],explain:'De basisgetallen zijn essentieel voor winkelen, leeftijden en tijden.',tip:'uno wordt un voor mannelijke woorden: un café, una cerveza.'},
+  {title:'Vragen stellen',icon:'❓',table:[{t:'¿Qué?',w:'Wat?',e:'¿Qué quieres? (Wat wil je?)'},{t:'¿Dónde?',w:'Waar?',e:'¿Dónde vives? (Waar woon je?)'},{t:'¿Cuándo?',w:'Wanneer?',e:'¿Cuándo llegas?'},{t:'¿Cómo?',w:'Hoe?',e:'¿Cómo estás?'},{t:'¿Por qué?',w:'Waarom?',e:'Porque... = Omdat...'},{t:'¿Quién?',w:'Wie?',e:'¿Quién eres?'}],explain:'Vragen in het Spaans: gebruik een vraagwoord of draai de volgorde om. Let op de omgekeerde vraagtekens!',tip:'In het Spaans staan vraagtekens én uitroeptekens ook aan het begin, maar dan omgekeerd: ¿ en ¡'},
+];
+
+// ── STATE & STORAGE ──────────────────────────────────────────────────
+let CU=null; // current user
+
+function allUsers(){return JSON.parse(localStorage.getItem('sg_users')||'{}')}
+function saveAll(u){localStorage.setItem('sg_users',JSON.stringify(u))}
+
+function getUser(name){
+  const all=allUsers();
+  if(!all[name]){
+    all[name]={name,avatar:name==='Arjette'?'👩':name==='Tonito'?'👨':'🧑',streak:0,lastDate:null,xp:0,learned:[],failed:[],sentOk:0,sentDone:0,speakDone:0};
+    saveAll(all);
+  }
+  return all[name];
+}
+
+function save(){const all=allUsers();all[CU.name]=CU;saveAll(all)}
+
+// ── LOGIN ────────────────────────────────────────────────────────────
+function renderLogin(){
+  const row=document.getElementById('user-row');
+  row.innerHTML='';
+  ['Tonito','Arjette'].forEach(name=>{
+    const u=getUser(name);
+    const d=document.createElement('div');
+    d.className='u-card';
+    d.onclick=()=>login(name);
+    d.innerHTML=`<div class="u-av">${u.avatar}</div><div class="u-name">${u.name}</div><div class="u-xp">⭐ ${u.xp} XP · ${u.learned.length} woorden</div>`;
+    row.appendChild(d);
+  });
+}
+
+function login(name){
+  CU=getUser(name);
+  const today=new Date().toDateString();
+  const yesterday=new Date(Date.now()-86400000).toDateString();
+  if(CU.lastDate!==today){
+    CU.streak=CU.lastDate===yesterday?CU.streak+1:1;
+    CU.lastDate=today;
+    save();
+  }
+  document.getElementById('login').style.display='none';
+  document.getElementById('app').style.display='flex';
+  updateBar();
+  go('home');
+}
+
+function loginNew(){
+  const n=document.getElementById('new-name').value.trim();
+  if(n)login(n);
+}
+
+function switchUser(){
+  document.getElementById('login').style.display='flex';
+  document.getElementById('app').style.display='none';
+  renderLogin();
+}
+
+function updateBar(){
+  document.getElementById('tb-streak').textContent='🔥 '+CU.streak;
+  document.getElementById('tb-xp').textContent='⭐ '+CU.xp;
+  document.getElementById('tb-user').textContent=CU.avatar+' '+CU.name;
+}
+
+// ── NAVIGATION ───────────────────────────────────────────────────────
+function go(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.bn-item').forEach(b=>b.classList.remove('active'));
+  document.getElementById('sc-'+id).classList.add('active');
+  const btn=document.querySelector('[data-sc="'+id+'"]');
+  if(btn)btn.classList.add('active');
+  window.scrollTo(0,0);
+  if(id==='home')renderHome();
+  else if(id==='words')initWords();
+  else if(id==='sentences')initSents();
+  else if(id==='speak')initSpeak();
+  else if(id==='grammar')initGrammar();
+}
+
+// ── HOME ─────────────────────────────────────────────────────────────
+function renderHome(){
+  const h=new Date().getHours();
+  const g=h<12?'¡Buenos días':h<18?'¡Buenas tardes':'¡Buenas noches';
+  document.getElementById('home-greeting').textContent=g+', '+CU.name+'!';
+  document.getElementById('sh-words').textContent=CU.learned.length;
+  document.getElementById('sh-streak').textContent=CU.streak;
+  document.getElementById('sh-xp').textContent=CU.xp;
+  document.getElementById('sh-sent').textContent=CU.sentOk;
+  const wp=Math.round(CU.learned.length/WORDS.length*100);
+  const sp=Math.round(CU.sentOk/SENTENCES.length*100);
+  document.getElementById('ph-wp').textContent=wp+'%';
+  document.getElementById('ph-wf').style.width=wp+'%';
+  document.getElementById('ph-sp').textContent=sp+'%';
+  document.getElementById('ph-sf').style.width=sp+'%';
+}
+
+// ── WORDS ────────────────────────────────────────────────────────────
+const CATS=['Alle','Begroetingen','Beleefdheid','Voornaamwoorden','Eten & drinken','Dagelijks leven','Mensen','Werkwoorden','Bijvoeglijk','Getallen','Tijd','Vragen'];
+let wFiltered=[],wIdx=0,wFlipped=false;
+
+function initWords(){
+  const cs=document.getElementById('cat-scroll');
+  cs.innerHTML='';
+  CATS.forEach(c=>{
+    const b=document.createElement('button');
+    b.className='cat-chip'+(c==='Alle'?' active':'');
+    b.textContent=c;
+    b.onclick=()=>{document.querySelectorAll('.cat-chip').forEach(x=>x.classList.remove('active'));b.classList.add('active');wFiltered=c==='Alle'?[...WORDS]:WORDS.filter(w=>w.cat===c);wIdx=0;showCard()};
+    cs.appendChild(b);
+  });
+  wFiltered=[...WORDS];wIdx=0;showCard();
+}
+
+function showCard(){
+  const w=wFiltered[wIdx%wFiltered.length];
+  const learned=new Set(CU.learned);
+  document.getElementById('c-cat').textContent=w.cat;
+  document.getElementById('c-cat2').textContent=w.cat;
+  document.getElementById('c-type').textContent=w.type;
+  document.getElementById('c-es').textContent=w.es;
+  document.getElementById('c-nl').textContent=w.nl;
+  document.getElementById('c-hint').textContent=w.hint;
+  document.getElementById('c-learned').style.display=learned.has(w.id)?'block':'none';
+  document.getElementById('c-tap').textContent='Tik om te omdraaien';
+  document.getElementById('word-ctr').textContent=(wIdx%wFiltered.length+1)+' / '+wFiltered.length+' · '+CU.learned.length+' geleerd';
+  document.getElementById('card-inner').classList.remove('flipped');
+  document.getElementById('ans-btns').style.display='none';
+  document.getElementById('flip-btns').style.display='flex';
+  wFlipped=false;
+}
+
+function flipCard(){
+  if(wFlipped)return;
+  wFlipped=true;
+  document.getElementById('card-inner').classList.add('flipped');
+  document.getElementById('c-tap').textContent='';
+  document.getElementById('ans-btns').style.display='flex';
+  document.getElementById('flip-btns').style.display='none';
+}
+
+function answerWord(ok){
+  const w=wFiltered[wIdx%wFiltered.length];
+  const learned=new Set(CU.learned);
+  const failed=new Set(CU.failed);
+  if(ok){learned.add(w.id);failed.delete(w.id);CU.xp+=10;confetti();toast('✓ +10 XP!');}
+  else{failed.add(w.id);learned.delete(w.id);CU.xp=Math.max(0,CU.xp-2);}
+  CU.learned=[...learned];CU.failed=[...failed];
+  save();updateBar();
+  wIdx++;
+  setTimeout(showCard,80);
+}
+
+function skipWord(){wIdx++;showCard();}
+
+// ── SENTENCES ────────────────────────────────────────────────────────
+let sIdx=0,sTiles=[],sChecked=false;
+
+function initSents(){sIdx=0;sChecked=false;loadSent();}
+
+function loadSent(){
+  const s=SENTENCES[sIdx%SENTENCES.length];
+  sTiles=[];sChecked=false;
+  document.getElementById('s-nl').textContent=s.nl;
+  document.getElementById('s-tip').textContent='💡 '+s.tip;
+  document.getElementById('s-num').textContent=(sIdx%SENTENCES.length+1)+' / '+SENTENCES.length;
+  document.getElementById('s-prog').style.width=Math.round((sIdx%SENTENCES.length+1)/SENTENCES.length*100)+'%';
+  document.getElementById('s-fb').style.display='none';
+  const az=document.getElementById('ans-zone');
+  az.innerHTML='';az.className='ans-zone';
+  const pa=document.getElementById('pool-area');
+  pa.innerHTML='';
+  const all=[...s.words,...s.extra].sort(()=>Math.random()-.5);
+  all.forEach((w,i)=>{
+    const c=document.createElement('button');
+    c.className='chip pool-chip';
+    c.textContent=w;
+    c.dataset.i=i;
+    c.onclick=()=>pickWord(c,w,i);
+    pa.appendChild(c);
+  });
+}
+
+function pickWord(el,w,i){
+  if(el.classList.contains('used')||sChecked)return;
+  el.classList.add('used');
+  sTiles.push({w,i,el});
+  const az=document.getElementById('ans-zone');
+  az.classList.add('active');
+  const c=document.createElement('button');
+  c.className='chip ans-chip';
+  c.textContent=w;
+  c.dataset.i=i;
+  c.onclick=()=>{if(sChecked)return;c.remove();el.classList.remove('used');sTiles=sTiles.filter(t=>t.i!==i);if(!az.children.length)az.className='ans-zone';};
+  az.appendChild(c);
+}
+
+function clearSent(){
+  if(sChecked)return;
+  sTiles.forEach(t=>t.el.classList.remove('used'));
+  sTiles=[];
+  const az=document.getElementById('ans-zone');
+  az.innerHTML='';az.className='ans-zone';
+}
+
+function checkSent(){
+  const s=SENTENCES[sIdx%SENTENCES.length];
+  const ans=sTiles.map(t=>t.w).join(' ').replace(/ ([.,!?¡¿])/g,'$1');
+  const cor=s.words.join(' ').replace(/ ([.,!?¡¿])/g,'$1');
+  const ok=ans.toLowerCase()===cor.toLowerCase();
+  const fb=document.getElementById('s-fb');
+  if(ok){fb.className='sent-fb ok';fb.textContent='¡Perfecto! Goed gedaan! ✓';CU.sentOk++;CU.xp+=15;confetti();toast('✓ Correct! +15 XP');}
+  else{fb.className='sent-fb fail';fb.textContent='✗ Niet helemaal. Correct: '+cor;}
+  CU.sentDone++;sChecked=true;fb.style.display='block';save();updateBar();
+}
+
+function nextSent(){sIdx++;loadSent();}
+
+// ── SPEAK ────────────────────────────────────────────────────────────
+let spIdx=0;
+
+function initSpeak(){spIdx=0;showSpeak();}
+
+function showSpeak(){
+  const it=SPEAK_ITEMS[spIdx%SPEAK_ITEMS.length];
+  document.getElementById('sp-es').textContent=it.es;
+  document.getElementById('sp-nl').textContent=it.nl;
+  document.getElementById('sp-ex').textContent=it.example;
+  document.getElementById('sp-tip').innerHTML='<strong>Uitspraak:</strong> '+it.tip;
+  document.getElementById('sp-ctr').textContent=(spIdx%SPEAK_ITEMS.length+1)+' / '+SPEAK_ITEMS.length;
+  document.getElementById('sp-result').style.display='none';
+  const rb=document.getElementById('rec-btn');
+  rb.className='audio-btn ab-speak';rb.textContent='🎤 Spreek na';
+}
+
+function playAudio(){
+  if(!window.speechSynthesis){toast('Niet beschikbaar');return;}
+  const it=SPEAK_ITEMS[spIdx%SPEAK_ITEMS.length];
+  speechSynthesis.cancel();
+  const u=new SpeechSynthesisUtterance(it.es);
+  u.lang='es-ES';u.rate=0.82;
+  speechSynthesis.speak(u);
+}
+
+function startRecord(){
+  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  const res=document.getElementById('sp-result');
+  if(!SR){res.className='sp-result fail';res.textContent='Gebruik Chrome voor spraakinvoer.';res.style.display='block';return;}
+  const rb=document.getElementById('rec-btn');
+  rb.className='audio-btn ab-speaking';rb.textContent='🔴 Luisteren...';
+  const rec=new SR();rec.lang='es-ES';rec.maxAlternatives=5;rec.start();
+  rec.onresult=e=>{
+    const heard=[...e.results[0]].map(r=>r.transcript.toLowerCase().trim());
+    const target=SPEAK_ITEMS[spIdx%SPEAK_ITEMS.length].es.toLowerCase().replace(/[¡¿.,!?]/g,'').trim();
+    const ok=heard.some(h=>h.replace(/[¡¿.,!?]/g,'').trim().includes(target)||target.includes(h.replace(/[¡¿.,!?]/g,'').trim())||sim(h,target)>.7);
+    res.className='sp-result '+(ok?'ok':'fail');
+    res.textContent=ok?'✓ Uitstekend! Je uitspraak klopt!':'✗ Je zei: "'+heard[0]+'". Probeer nog eens!';
+    res.style.display='block';
+    if(ok){CU.speakDone++;CU.xp+=5;save();updateBar();confetti();}
+    rb.className='audio-btn ab-speak';rb.textContent='🎤 Spreek na';
+  };
+  rec.onerror=()=>{res.className='sp-result fail';res.textContent='Microfoon niet bereikbaar.';res.style.display='block';rb.className='audio-btn ab-speak';rb.textContent='🎤 Spreek na';};
+}
+
+function sim(a,b){const l=a.length>b.length?a:b,s=a.length>b.length?b:a;if(!l.length)return 1;return(l.length-ed(l,s))/l.length;}
+function ed(a,b){const d=Array.from({length:a.length+1},(_,i)=>Array.from({length:b.length+1},(_,j)=>i===0?j:j===0?i:0));for(let i=1;i<=a.length;i++)for(let j=1;j<=b.length;j++)d[i][j]=a[i-1]===b[j-1]?d[i-1][j-1]:1+Math.min(d[i-1][j],d[i][j-1],d[i-1][j-1]);return d[a.length][b.length];}
+
+function prevSpeak(){spIdx=(spIdx-1+SPEAK_ITEMS.length)%SPEAK_ITEMS.length;showSpeak();}
+function nextSpeak(){spIdx=(spIdx+1)%SPEAK_ITEMS.length;showSpeak();}
+
+// ── GRAMMAR ──────────────────────────────────────────────────────────
+function initGrammar(){
+  const gl=document.getElementById('gr-list');
+  gl.innerHTML='';
+  GRAMMAR.forEach(g=>{
+    const rows=g.table.map(r=>`<tr><td>${r.t}</td><td>${r.w}</td><td>${r.e}</td></tr>`).join('');
+    const card=document.createElement('div');
+    card.className='gr-card';
+    card.innerHTML=`
+      <div class="gr-hdr" onclick="this.parentElement.classList.toggle('open')">
+        <span class="gr-icon">${g.icon}</span>
+        <span class="gr-title">${g.title}</span>
+        <span class="gr-chevron">▼</span>
+      </div>
+      <div class="gr-body">
+        <p class="gr-explain">${g.explain}</p>
+        <table class="gr-table"><thead><tr><th>Vorm</th><th>Spaans</th><th>Voorbeeld</th></tr></thead><tbody>${rows}</tbody></table>
+        <div class="gr-tip">💡 ${g.tip}</div>
+      </div>`;
+    gl.appendChild(card);
+  });
+}
+
+// ── CONFETTI ──────────────────────────────────────────────────────────
+const COLORS=['#4C3BCF','#00B894','#FF7043','#FFD93D','#E91E8C','#2196F3','#FF4757'];
+function confetti(){
+  const wrap=document.getElementById('confetti-wrap');
+  for(let i=0;i<22;i++){
+    const c=document.createElement('div');
+    c.className='confetto';
+    c.style.cssText=`left:${Math.random()*100}%;background:${COLORS[i%COLORS.length]};border-radius:${Math.random()>.5?'50%':'2px'};width:${6+Math.random()*8}px;height:${6+Math.random()*8}px;animation:fall ${.8+Math.random()*.8}s ease-in ${Math.random()*.3}s forwards`;
+    wrap.appendChild(c);
+    setTimeout(()=>c.remove(),1800);
+  }
+}
+
+// inject confetti keyframes
+const ks=document.createElement('style');
+ks.textContent='@keyframes fall{0%{opacity:1;top:-10px;transform:rotate(0deg) translateX(0)}100%{opacity:0;top:100vh;transform:rotate(720deg) translateX('+((Math.random()-.5)*200)+'px)}}';
+document.head.appendChild(ks);
+
+// ── TOAST ────────────────────────────────────────────────────────────
+function toast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),1800);
+}
+
+// ── INIT ─────────────────────────────────────────────────────────────
+document.getElementById('new-name').addEventListener('keydown',e=>{if(e.key==='Enter')loginNew();});
+renderLogin();
+</script>
+</body>
+</html>
