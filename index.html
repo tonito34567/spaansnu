@@ -77,6 +77,15 @@ body{max-width:480px;margin:0 auto;position:relative}
 .stat-num{font-size:2rem;font-weight:800;color:var(--text);line-height:1}
 .stat-lbl{font-size:.72rem;color:var(--gray3);font-weight:600;text-transform:uppercase;letter-spacing:.04em;margin-top:3px}
 .section-title{font-size:.72rem;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--gray3);margin-bottom:.65rem}
+.level-row{display:flex;gap:.55rem;margin-bottom:1.25rem}
+.level-card{flex:1;border-radius:var(--radius);padding:.85rem .6rem;text-align:center;cursor:pointer;transition:.15s;border:2.5px solid var(--gray2);background:#fff;position:relative}
+.level-card.active{border-color:var(--purple);background:linear-gradient(135deg,#F0EEFF,#fff)}
+.level-card.locked{opacity:.5;cursor:not-allowed}
+.level-card:not(.locked):active{transform:scale(.95)}
+.level-emoji{font-size:1.5rem;margin-bottom:.25rem}
+.level-name{font-size:.78rem;font-weight:700;color:var(--text)}
+.level-pct{font-size:.68rem;color:var(--gray3);margin-top:2px;font-weight:600}
+.level-lock{position:absolute;top:6px;right:8px;font-size:.75rem}
 .module-grid{display:grid;grid-template-columns:1fr 1fr;gap:.65rem;margin-bottom:1.25rem}
 .mod-card{background:#fff;border:2px solid var(--gray2);border-radius:var(--radius);padding:1.1rem .9rem;cursor:pointer;transition:.15s;text-align:center}
 .mod-card:hover{transform:translateY(-2px);border-color:var(--purple)}
@@ -226,6 +235,10 @@ body{max-width:480px;margin:0 auto;position:relative}
     <div id="sc-home" class="screen">
       <div class="greeting" id="home-greeting">¡Hola!</div>
       <div class="greeting-sub">Wat ga je vandaag leren?</div>
+
+      <div class="section-title">Niveau</div>
+      <div class="level-row" id="level-row"></div>
+
       <div class="stat-row">
         <div class="stat-box purple"><div class="stat-num" id="sh-words">0</div><div class="stat-lbl">Woorden geleerd</div></div>
         <div class="stat-box green"><div class="stat-num" id="sh-streak">0</div><div class="stat-lbl">Dagen op rij 🔥</div></div>
@@ -343,7 +356,10 @@ body{max-width:480px;margin:0 auto;position:relative}
 
 <script>
 // ── DATA ────────────────────────────────────────────────────────────
-const WORDS=[
+// ════════════════════════════════════════════════════════════════════
+// LEVEL 1 — BEGINNER (bestaande 70 woorden)
+// ════════════════════════════════════════════════════════════════════
+const WORDS_L1=[
   {id:'w01',es:'hola',nl:'hallo',cat:'Begroetingen',type:'uitdrukking',hint:'De "h" is stil. Zeg: oh-la'},
   {id:'w02',es:'buenos días',nl:'goedemorgen',cat:'Begroetingen',type:'uitdrukking',hint:'Zeg: bweh-nos dee-as'},
   {id:'w03',es:'buenas tardes',nl:'goedemiddag',cat:'Begroetingen',type:'uitdrukking',hint:'Gebruik na 14:00 uur'},
@@ -416,7 +432,168 @@ const WORDS=[
   {id:'w70',es:'¿quién?',nl:'wie?',cat:'Vragen',type:'vraagwoord',hint:'¿Quién eres? = Wie ben jij?'},
 ];
 
-const SENTENCES=[
+// ════════════════════════════════════════════════════════════════════
+// LEVEL 2 — GEVORDERD (nieuwe 70 woorden)
+// ════════════════════════════════════════════════════════════════════
+const WORDS_L2=[
+  {id:'w71',es:'desayuno',nl:'ontbijt',cat:'Eten & drinken',type:'zelfst. naamwoord',hint:'Desayunar = ontbijten'},
+  {id:'w72',es:'almuerzo',nl:'lunch',cat:'Eten & drinken',type:'zelfst. naamwoord',hint:'Almorzar = lunchen'},
+  {id:'w73',es:'cena',nl:'avondeten',cat:'Eten & drinken',type:'zelfst. naamwoord',hint:'Cenar = dineren'},
+  {id:'w74',es:'postre',nl:'toetje',cat:'Eten & drinken',type:'zelfst. naamwoord',hint:'¿Quieres postre?'},
+  {id:'w75',es:'verdura',nl:'groente',cat:'Eten & drinken',type:'zelfst. naamwoord',hint:'Vrouwelijk: la verdura'},
+  {id:'w76',es:'pescado',nl:'vis (om te eten)',cat:'Eten & drinken',type:'zelfst. naamwoord',hint:'Pez = levende vis'},
+  {id:'w77',es:'queso',nl:'kaas',cat:'Eten & drinken',type:'zelfst. naamwoord',hint:'Mannelijk: el queso'},
+  {id:'w78',es:'huevo',nl:'ei',cat:'Eten & drinken',type:'zelfst. naamwoord',hint:'Huevos fritos = gebakken eieren'},
+  {id:'w79',es:'sopa',nl:'soep',cat:'Eten & drinken',type:'zelfst. naamwoord',hint:'Vrouwelijk: la sopa'},
+  {id:'w80',es:'azúcar',nl:'suiker',cat:'Eten & drinken',type:'zelfst. naamwoord',hint:'Kan mannelijk of vrouwelijk zijn'},
+  {id:'w81',es:'sal',nl:'zout',cat:'Eten & drinken',type:'zelfst. naamwoord',hint:'Vrouwelijk: la sal'},
+  {id:'w82',es:'hermano / hermana',nl:'broer / zus',cat:'Mensen',type:'zelfst. naamwoord',hint:'hermano = broer, hermana = zus'},
+  {id:'w83',es:'abuelo / abuela',nl:'opa / oma',cat:'Mensen',type:'zelfst. naamwoord',hint:'abuelos = grootouders'},
+  {id:'w84',es:'hijo / hija',nl:'zoon / dochter',cat:'Mensen',type:'zelfst. naamwoord',hint:'hijos = kinderen (gemengd)'},
+  {id:'w85',es:'niño / niña',nl:'jongen / meisje',cat:'Mensen',type:'zelfst. naamwoord',hint:'niños = kinderen'},
+  {id:'w86',es:'vecino',nl:'buurman',cat:'Mensen',type:'zelfst. naamwoord',hint:'Vecina = buurvrouw'},
+  {id:'w87',es:'jefe',nl:'baas',cat:'Mensen',type:'zelfst. naamwoord',hint:'Jefa voor een vrouwelijke baas'},
+  {id:'w88',es:'compañero',nl:'collega / partner',cat:'Mensen',type:'zelfst. naamwoord',hint:'Compañero de trabajo = collega'},
+  {id:'w89',es:'empezar',nl:'beginnen',cat:'Werkwoorden',type:'werkwoord',hint:'Onregelmatig: empiezo, empiezas...'},
+  {id:'w90',es:'terminar',nl:'eindigen / afmaken',cat:'Werkwoorden',type:'werkwoord',hint:'-ar regelmatig: termino, terminas...'},
+  {id:'w91',es:'pensar',nl:'denken',cat:'Werkwoorden',type:'werkwoord',hint:'Onregelmatig: pienso, piensas...'},
+  {id:'w92',es:'saber',nl:'weten / kunnen (vaardigheid)',cat:'Werkwoorden',type:'werkwoord',hint:'sé, sabes, sabe... (sé = ik weet)'},
+  {id:'w93',es:'conocer',nl:'kennen (personen/plekken)',cat:'Werkwoorden',type:'werkwoord',hint:'conozco, conoces, conoce...'},
+  {id:'w94',es:'dormir',nl:'slapen',cat:'Werkwoorden',type:'werkwoord',hint:'Onregelmatig: duermo, duermes...'},
+  {id:'w95',es:'jugar',nl:'spelen',cat:'Werkwoorden',type:'werkwoord',hint:'Onregelmatig: juego, juegas...'},
+  {id:'w96',es:'escribir',nl:'schrijven',cat:'Werkwoorden',type:'werkwoord',hint:'-ir regelmatig: escribo, escribes...'},
+  {id:'w97',es:'leer',nl:'lezen',cat:'Werkwoorden',type:'werkwoord',hint:'leo, lees, lee, leemos...'},
+  {id:'w98',es:'venir',nl:'komen',cat:'Werkwoorden',type:'werkwoord',hint:'Onregelmatig: vengo, vienes, viene...'},
+  {id:'w99',es:'salir',nl:'weggaan / uitgaan',cat:'Werkwoorden',type:'werkwoord',hint:'salgo, sales, sale...'},
+  {id:'w100',es:'llegar',nl:'aankomen',cat:'Werkwoorden',type:'werkwoord',hint:'llego, llegas, llega...'},
+  {id:'w101',es:'buscar',nl:'zoeken',cat:'Werkwoorden',type:'werkwoord',hint:'busco, buscas, busca...'},
+  {id:'w102',es:'encontrar',nl:'vinden',cat:'Werkwoorden',type:'werkwoord',hint:'Onregelmatig: encuentro, encuentras...'},
+  {id:'w103',es:'ayudar',nl:'helpen',cat:'Werkwoorden',type:'werkwoord',hint:'ayudo, ayudas, ayuda...'},
+  {id:'w104',es:'necesitar',nl:'nodig hebben',cat:'Werkwoorden',type:'werkwoord',hint:'necesito, necesitas, necesita...'},
+  {id:'w105',es:'rápido',nl:'snel',cat:'Bijvoeglijk',type:'bijv. naamwoord',hint:'Ook bijwoord: rápidamente'},
+  {id:'w106',es:'lento',nl:'langzaam',cat:'Bijvoeglijk',type:'bijv. naamwoord',hint:'Lenta voor vrouwelijke woorden'},
+  {id:'w107',es:'difícil',nl:'moeilijk',cat:'Bijvoeglijk',type:'bijv. naamwoord',hint:'Onveranderlijk voor geslacht'},
+  {id:'w108',es:'fácil',nl:'makkelijk',cat:'Bijvoeglijk',type:'bijv. naamwoord',hint:'Onveranderlijk voor geslacht'},
+  {id:'w109',es:'caro',nl:'duur',cat:'Bijvoeglijk',type:'bijv. naamwoord',hint:'Cara voor vrouwelijke woorden'},
+  {id:'w110',es:'barato',nl:'goedkoop',cat:'Bijvoeglijk',type:'bijv. naamwoord',hint:'Barata voor vrouwelijke woorden'},
+  {id:'w111',es:'nuevo',nl:'nieuw',cat:'Bijvoeglijk',type:'bijv. naamwoord',hint:'Nueva voor vrouwelijke woorden'},
+  {id:'w112',es:'viejo',nl:'oud',cat:'Bijvoeglijk',type:'bijv. naamwoord',hint:'Vieja voor vrouwelijke woorden'},
+  {id:'w113',es:'importante',nl:'belangrijk',cat:'Bijvoeglijk',type:'bijv. naamwoord',hint:'Onveranderlijk voor geslacht'},
+  {id:'w114',es:'interesante',nl:'interessant',cat:'Bijvoeglijk',type:'bijv. naamwoord',hint:'Onveranderlijk voor geslacht'},
+  {id:'w115',es:'lunes',nl:'maandag',cat:'Tijd',type:'zelfst. naamwoord',hint:'Dagen v.d. week niet hoofdletter'},
+  {id:'w116',es:'martes',nl:'dinsdag',cat:'Tijd',type:'zelfst. naamwoord',hint:''},
+  {id:'w117',es:'semana',nl:'week',cat:'Tijd',type:'zelfst. naamwoord',hint:'La semana que viene = volgende week'},
+  {id:'w118',es:'mes',nl:'maand',cat:'Tijd',type:'zelfst. naamwoord',hint:'Mannelijk: el mes'},
+  {id:'w119',es:'año',nl:'jaar',cat:'Tijd',type:'zelfst. naamwoord',hint:'Mannelijk: el año'},
+  {id:'w120',es:'temprano',nl:'vroeg',cat:'Tijd',type:'bijwoord',hint:'Llego temprano = ik kom vroeg aan'},
+  {id:'w121',es:'tarde',nl:'laat',cat:'Tijd',type:'bijwoord',hint:'Ook: middag (als zelfst. naamwoord)'},
+  {id:'w122',es:'aeropuerto',nl:'vliegveld',cat:'Reizen',type:'zelfst. naamwoord',hint:'Mannelijk: el aeropuerto'},
+  {id:'w123',es:'billete',nl:'kaartje / ticket',cat:'Reizen',type:'zelfst. naamwoord',hint:'In Latijns-Amerika: boleto'},
+  {id:'w124',es:'maleta',nl:'koffer',cat:'Reizen',type:'zelfst. naamwoord',hint:'Vrouwelijk: la maleta'},
+  {id:'w125',es:'hotel',nl:'hotel',cat:'Reizen',type:'zelfst. naamwoord',hint:'Mannelijk: el hotel'},
+  {id:'w126',es:'habitación',nl:'kamer',cat:'Reizen',type:'zelfst. naamwoord',hint:'Vrouwelijk: la habitación'},
+  {id:'w127',es:'playa',nl:'strand',cat:'Reizen',type:'zelfst. naamwoord',hint:'Vrouwelijk: la playa'},
+  {id:'w128',es:'mapa',nl:'kaart (landkaart)',cat:'Reizen',type:'zelfst. naamwoord',hint:'Let op: mannelijk! el mapa'},
+  {id:'w129',es:'tren',nl:'trein',cat:'Reizen',type:'zelfst. naamwoord',hint:'Mannelijk: el tren'},
+  {id:'w130',es:'autobús',nl:'bus',cat:'Reizen',type:'zelfst. naamwoord',hint:'Ook: bus / camión (Mexico)'},
+  {id:'w131',es:'izquierda',nl:'links',cat:'Richting',type:'zelfst. naamwoord',hint:'A la izquierda = naar links'},
+  {id:'w132',es:'derecha',nl:'rechts',cat:'Richting',type:'zelfst. naamwoord',hint:'A la derecha = naar rechts'},
+  {id:'w133',es:'recto',nl:'rechtdoor',cat:'Richting',type:'bijwoord',hint:'Siga recto = ga rechtdoor'},
+  {id:'w134',es:'cerca',nl:'dichtbij',cat:'Richting',type:'bijwoord',hint:'Cerca de aquí = dichtbij hier'},
+  {id:'w135',es:'lejos',nl:'ver weg',cat:'Richting',type:'bijwoord',hint:'Está lejos = het is ver'},
+  {id:'w136',es:'rojo',nl:'rood',cat:'Kleuren',type:'bijv. naamwoord',hint:'Roja voor vrouwelijke woorden'},
+  {id:'w137',es:'azul',nl:'blauw',cat:'Kleuren',type:'bijv. naamwoord',hint:'Onveranderlijk voor geslacht'},
+  {id:'w138',es:'verde',nl:'groen',cat:'Kleuren',type:'bijv. naamwoord',hint:'Onveranderlijk voor geslacht'},
+  {id:'w139',es:'negro',nl:'zwart',cat:'Kleuren',type:'bijv. naamwoord',hint:'Negra voor vrouwelijke woorden'},
+  {id:'w140',es:'blanco',nl:'wit',cat:'Kleuren',type:'bijv. naamwoord',hint:'Blanca voor vrouwelijke woorden'},
+];
+
+// ════════════════════════════════════════════════════════════════════
+// LEVEL 3 — VERGEVORDERD (nieuwe 70 woorden)
+// ════════════════════════════════════════════════════════════════════
+const WORDS_L3=[
+  {id:'w141',es:'aunque',nl:'hoewel / ook al',cat:'Voegwoorden',type:'voegwoord',hint:'Vaak gevolgd door subjuntivo'},
+  {id:'w142',es:'mientras',nl:'terwijl',cat:'Voegwoorden',type:'voegwoord',hint:'Mientras tanto = ondertussen'},
+  {id:'w143',es:'aunque',nl:'hoewel',cat:'Voegwoorden',type:'voegwoord',hint:'Synoniem: a pesar de que'},
+  {id:'w144',es:'sin embargo',nl:'echter / desondanks',cat:'Voegwoorden',type:'uitdrukking',hint:'Formeler dan "pero"'},
+  {id:'w145',es:'además',nl:'bovendien',cat:'Voegwoorden',type:'bijwoord',hint:'Además, también = bovendien, ook'},
+  {id:'w146',es:'por lo tanto',nl:'daarom / dus',cat:'Voegwoorden',type:'uitdrukking',hint:'Gevolgtrekking aangeven'},
+  {id:'w147',es:'a menos que',nl:'tenzij',cat:'Voegwoorden',type:'uitdrukking',hint:'Vereist subjuntivo'},
+  {id:'w148',es:'gobierno',nl:'regering',cat:'Maatschappij',type:'zelfst. naamwoord',hint:'Mannelijk: el gobierno'},
+  {id:'w149',es:'economía',nl:'economie',cat:'Maatschappij',type:'zelfst. naamwoord',hint:'Vrouwelijk: la economía'},
+  {id:'w150',es:'sociedad',nl:'maatschappij',cat:'Maatschappij',type:'zelfst. naamwoord',hint:'Vrouwelijk: la sociedad'},
+  {id:'w151',es:'desarrollo',nl:'ontwikkeling',cat:'Maatschappij',type:'zelfst. naamwoord',hint:'Desarrollar = ontwikkelen'},
+  {id:'w152',es:'medio ambiente',nl:'milieu',cat:'Maatschappij',type:'zelfst. naamwoord',hint:'Mannelijk: el medio ambiente'},
+  {id:'w153',es:'derecho',nl:'recht (juridisch)',cat:'Maatschappij',type:'zelfst. naamwoord',hint:'Derechos humanos = mensenrechten'},
+  {id:'w154',es:'lograr',nl:'bereiken / slagen in',cat:'Werkwoorden',type:'werkwoord',hint:'logro, logras, logra...'},
+  {id:'w155',es:'enfrentar',nl:'het hoofd bieden aan',cat:'Werkwoorden',type:'werkwoord',hint:'enfrento, enfrentas...'},
+  {id:'w156',es:'suponer',nl:'veronderstellen',cat:'Werkwoorden',type:'werkwoord',hint:'Onregelmatig: supongo, supones...'},
+  {id:'w157',es:'sugerir',nl:'voorstellen / suggereren',cat:'Werkwoorden',type:'werkwoord',hint:'Onregelmatig: sugiero, sugieres...'},
+  {id:'w158',es:'permitir',nl:'toestaan',cat:'Werkwoorden',type:'werkwoord',hint:'permito, permites, permite...'},
+  {id:'w159',es:'evitar',nl:'vermijden',cat:'Werkwoorden',type:'werkwoord',hint:'evito, evitas, evita...'},
+  {id:'w160',es:'considerar',nl:'overwegen / beschouwen',cat:'Werkwoorden',type:'werkwoord',hint:'considero, consideras...'},
+  {id:'w161',es:'reflexionar',nl:'nadenken / overpeinzen',cat:'Werkwoorden',type:'werkwoord',hint:'reflexiono, reflexionas...'},
+  {id:'w162',es:'destacar',nl:'benadrukken / opvallen',cat:'Werkwoorden',type:'werkwoord',hint:'destaco, destacas, destaca...'},
+  {id:'w163',es:'fortalecer',nl:'versterken',cat:'Werkwoorden',type:'werkwoord',hint:'Onregelmatig: fortalezco, fortaleces...'},
+  {id:'w164',es:'aprovechar',nl:'profiteren van / benutten',cat:'Werkwoorden',type:'werkwoord',hint:'aprovecho, aprovechas...'},
+  {id:'w165',es:'soler',nl:'gewoonlijk doen',cat:'Werkwoorden',type:'werkwoord',hint:'Onregelmatig: suelo, sueles... + infinitief'},
+  {id:'w166',es:'a pesar de',nl:'ondanks',cat:'Uitdrukkingen',type:'uitdrukking',hint:'A pesar de todo = ondanks alles'},
+  {id:'w167',es:'de hecho',nl:'in feite / inderdaad',cat:'Uitdrukkingen',type:'uitdrukking',hint:'Vaak gebruikt om iets te bevestigen'},
+  {id:'w168',es:'en cuanto a',nl:'wat betreft',cat:'Uitdrukkingen',type:'uitdrukking',hint:'En cuanto a mí = wat mij betreft'},
+  {id:'w169',es:'cabe destacar',nl:'het is vermeldenswaard',cat:'Uitdrukkingen',type:'uitdrukking',hint:'Formele schrijftaal'},
+  {id:'w170',es:'al fin y al cabo',nl:'uiteindelijk / per slot van rekening',cat:'Uitdrukkingen',type:'uitdrukking',hint:'Veelgebruikte vaste uitdrukking'},
+  {id:'w171',es:'darse cuenta de',nl:'beseffen',cat:'Uitdrukkingen',type:'uitdrukking',hint:'Me di cuenta de que... = ik besefte dat...'},
+  {id:'w172',es:'llevar a cabo',nl:'uitvoeren',cat:'Uitdrukkingen',type:'uitdrukking',hint:'Llevar a cabo un proyecto'},
+  {id:'w173',es:'tener en cuenta',nl:'rekening houden met',cat:'Uitdrukkingen',type:'uitdrukking',hint:'Ten en cuenta que... = bedenk dat...'},
+  {id:'w174',es:'desempeñar',nl:'vervullen (een rol)',cat:'Werk & carrière',type:'werkwoord',hint:'Desempeñar un papel = een rol vervullen'},
+  {id:'w175',es:'capacitar',nl:'opleiden / trainen',cat:'Werk & carrière',type:'werkwoord',hint:'capacito, capacitas...'},
+  {id:'w176',es:'rendimiento',nl:'prestatie / opbrengst',cat:'Werk & carrière',type:'zelfst. naamwoord',hint:'Mannelijk: el rendimiento'},
+  {id:'w177',es:'plazo',nl:'termijn / deadline',cat:'Werk & carrière',type:'zelfst. naamwoord',hint:'A corto/largo plazo = op korte/lange termijn'},
+  {id:'w178',es:'reunión',nl:'vergadering',cat:'Werk & carrière',type:'zelfst. naamwoord',hint:'Vrouwelijk: la reunión'},
+  {id:'w179',es:'empresa',nl:'bedrijf',cat:'Werk & carrière',type:'zelfst. naamwoord',hint:'Vrouwelijk: la empresa'},
+  {id:'w180',es:'objetivo',nl:'doel',cat:'Werk & carrière',type:'zelfst. naamwoord',hint:'Mannelijk: el objetivo'},
+  {id:'w181',es:'estrategia',nl:'strategie',cat:'Werk & carrière',type:'zelfst. naamwoord',hint:'Vrouwelijk: la estrategia'},
+  {id:'w182',es:'inquietud',nl:'bezorgdheid / onrust',cat:'Emoties',type:'zelfst. naamwoord',hint:'Vrouwelijk: la inquietud'},
+  {id:'w183',es:'alivio',nl:'opluchting',cat:'Emoties',type:'zelfst. naamwoord',hint:'Mannelijk: el alivio'},
+  {id:'w184',es:'orgulloso',nl:'trots',cat:'Emoties',type:'bijv. naamwoord',hint:'Orgullosa voor vrouwelijke woorden'},
+  {id:'w185',es:'decepcionado',nl:'teleurgesteld',cat:'Emoties',type:'bijv. naamwoord',hint:'Decepcionar = teleurstellen'},
+  {id:'w186',es:'agradecido',nl:'dankbaar',cat:'Emoties',type:'bijv. naamwoord',hint:'Estoy agradecido = ik ben dankbaar'},
+  {id:'w187',es:'sorprendente',nl:'verrassend',cat:'Emoties',type:'bijv. naamwoord',hint:'Onveranderlijk voor geslacht'},
+  {id:'w188',es:'abrumador',nl:'overweldigend',cat:'Emoties',type:'bijv. naamwoord',hint:'Abrumadora voor vrouwelijke woorden'},
+  {id:'w189',es:'imprescindible',nl:'onmisbaar / essentieel',cat:'Bijvoeglijk',type:'bijv. naamwoord',hint:'Onveranderlijk voor geslacht'},
+  {id:'w190',es:'sostenible',nl:'duurzaam',cat:'Bijvoeglijk',type:'bijv. naamwoord',hint:'Desarrollo sostenible = duurzame ontwikkeling'},
+  {id:'w191',es:'eficaz',nl:'doeltreffend',cat:'Bijvoeglijk',type:'bijv. naamwoord',hint:'Onveranderlijk voor geslacht'},
+  {id:'w192',es:'innovador',nl:'innovatief',cat:'Bijvoeglijk',type:'bijv. naamwoord',hint:'Innovadora voor vrouwelijke woorden'},
+  {id:'w193',es:'cotidiano',nl:'alledaags',cat:'Bijvoeglijk',type:'bijv. naamwoord',hint:'Vida cotidiana = het dagelijks leven'},
+  {id:'w194',es:'inevitable',nl:'onvermijdelijk',cat:'Bijvoeglijk',type:'bijv. naamwoord',hint:'Onveranderlijk voor geslacht'},
+  {id:'w195',es:'previo',nl:'voorafgaand',cat:'Bijvoeglijk',type:'bijv. naamwoord',hint:'Previa voor vrouwelijke woorden'},
+  {id:'w196',es:'amenaza',nl:'dreiging',cat:'Maatschappij',type:'zelfst. naamwoord',hint:'Vrouwelijk: la amenaza'},
+  {id:'w197',es:'logro',nl:'prestatie / verworvenheid',cat:'Maatschappij',type:'zelfst. naamwoord',hint:'Mannelijk: el logro'},
+  {id:'w198',es:'reto',nl:'uitdaging',cat:'Maatschappij',type:'zelfst. naamwoord',hint:'Mannelijk: el reto'},
+  {id:'w199',es:'consecuencia',nl:'gevolg',cat:'Maatschappij',type:'zelfst. naamwoord',hint:'Como consecuencia = als gevolg'},
+  {id:'w200',es:'ámbito',nl:'gebied / domein',cat:'Maatschappij',type:'zelfst. naamwoord',hint:'En el ámbito laboral = op werkgebied'},
+  {id:'w201',es:'medida',nl:'maatregel',cat:'Maatschappij',type:'zelfst. naamwoord',hint:'Tomar medidas = maatregelen nemen'},
+  {id:'w202',es:'a fin de que',nl:'opdat / zodat',cat:'Voegwoorden',type:'uitdrukking',hint:'Vereist subjuntivo'},
+  {id:'w203',es:'siempre que',nl:'mits / zo vaak als',cat:'Voegwoorden',type:'uitdrukking',hint:'Context-afhankelijk'},
+  {id:'w204',es:'puesto que',nl:'aangezien',cat:'Voegwoorden',type:'voegwoord',hint:'Synoniem: ya que'},
+  {id:'w205',es:'no obstante',nl:'niettemin',cat:'Voegwoorden',type:'uitdrukking',hint:'Formeel synoniem van "sin embargo"'},
+  {id:'w206',es:'matiz',nl:'nuance',cat:'Abstracte begrippen',type:'zelfst. naamwoord',hint:'Mannelijk: el matiz'},
+  {id:'w207',es:'enfoque',nl:'aanpak / focus',cat:'Abstracte begrippen',type:'zelfst. naamwoord',hint:'Mannelijk: el enfoque'},
+  {id:'w208',es:'percepción',nl:'perceptie',cat:'Abstracte begrippen',type:'zelfst. naamwoord',hint:'Vrouwelijk: la percepción'},
+  {id:'w209',es:'criterio',nl:'criterium',cat:'Abstracte begrippen',type:'zelfst. naamwoord',hint:'Mannelijk: el criterio'},
+  {id:'w210',es:'ámbito',nl:'sfeer / context',cat:'Abstracte begrippen',type:'zelfst. naamwoord',hint:'Synoniem voor "gebied"'},
+];
+
+const WORDS=[...WORDS_L1,...WORDS_L2,...WORDS_L3];
+const LEVEL_OF_WORD=id=>{
+  const n=parseInt(id.replace('w',''));
+  return n<=70?1:n<=140?2:3;
+};
+
+// ════════════════════════════════════════════════════════════════════
+// ZINNEN — LEVEL 1 (bestaande 20 + uitbreiding naar evenwicht)
+// ════════════════════════════════════════════════════════════════════
+const SENT_L1=[
   {nl:'Ik heet Tonito.',es:'Me llamo Tonito.',words:['Me','llamo','Tonito','.'],extra:['Yo','soy','hola','gracias','estoy'],tip:'Me llamo = Ik heet (letterlijk: ik noem mezelf)'},
   {nl:'Goedemorgen! Hoe heet jij?',es:'¡Buenos días! ¿Cómo te llamas?',words:['¡Buenos','días!','¿Cómo','te','llamas?'],extra:['hola','gracias','bien','estás'],tip:'¿Cómo te llamas? = letterlijk: hoe noem je jezelf?'},
   {nl:'Ik wil water, alsjeblieft.',es:'Quiero agua, por favor.',words:['Quiero','agua',',','por','favor','.'],extra:['comer','grande','hoy','beber'],tip:'Quiero komt van querer = willen'},
@@ -437,7 +614,62 @@ const SENTENCES=[
   {nl:'De rekening graag.',es:'La cuenta, por favor.',words:['La','cuenta',',','por','favor','.'],extra:['el','agua','grande','tienda'],tip:'Essentieel in een restaurant!'},
   {nl:'Morgen ga ik werken.',es:'Mañana voy a trabajar.',words:['Mañana','voy','a','trabajar','.'],extra:['hoy','ayer','ir','trabajo'],tip:'Voy a + infinitief = toekomst'},
   {nl:'Wij hebben geld.',es:'Tenemos dinero.',words:['Tenemos','dinero','.'],extra:['tengo','trabajo','grande','mucho'],tip:'Tenemos = wij hebben (tener)'},
+  {nl:'Mijn vader is aardig.',es:'Mi padre es bueno.',words:['Mi','padre','es','bueno','.'],extra:['madre','grande','está','mala'],tip:'Es voor karaktereigenschap (ser)'},
+  {nl:'Wij gaan vandaag naar de stad.',es:'Vamos a la ciudad hoy.',words:['Vamos','a','la','ciudad','hoy','.'],extra:['voy','casa','mañana','tienda'],tip:'Vamos = wij gaan (ir)'},
+  {nl:'Zij spreekt altijd Spaans.',es:'Ella siempre habla español.',words:['Ella','siempre','habla','español','.'],extra:['nunca','él','bien','tú'],tip:'Siempre = altijd. Habla = zij spreekt'},
+  {nl:'Ik heb geen tijd.',es:'No tengo tiempo.',words:['No','tengo','tiempo','.'],extra:['sí','tienes','dinero','trabajo'],tip:'No + werkwoord = ontkenning'},
 ];
+
+// ════════════════════════════════════════════════════════════════════
+// ZINNEN — LEVEL 2
+// ════════════════════════════════════════════════════════════════════
+const SENT_L2=[
+  {nl:'Ik ben gisteren laat aangekomen.',es:'Llegué tarde ayer.',words:['Llegué','tarde','ayer','.'],extra:['llego','temprano','hoy','vine'],tip:'Llegué = ik kwam aan (verleden tijd van llegar)'},
+  {nl:'Wij houden van koken in het weekend.',es:'Nos gusta cocinar el fin de semana.',words:['Nos','gusta','cocinar','el','fin','de','semana','.'],extra:['gustan','comer','siempre','nunca'],tip:'Nos gusta + infinitief = wij houden ervan om...'},
+  {nl:'Mijn broer werkt bij een groot bedrijf.',es:'Mi hermano trabaja en una empresa grande.',words:['Mi','hermano','trabaja','en','una','empresa','grande','.'],extra:['hermana','pequeña','jefe','vive'],tip:'Trabaja en = hij werkt bij'},
+  {nl:'Ik moet morgen vroeg beginnen.',es:'Tengo que empezar temprano mañana.',words:['Tengo','que','empezar','temprano','mañana','.'],extra:['terminar','tarde','ayer','quiero'],tip:'Tengo que + infinitief = ik moet'},
+  {nl:'Weet je waar het station is?',es:'¿Sabes dónde está la estación?',words:['¿Sabes','dónde','está','la','estación?'],extra:['conoces','aeropuerto','tren','es'],tip:'Sabes (saber) voor feitelijke kennis'},
+  {nl:'Het is moeilijk maar belangrijk.',es:'Es difícil pero importante.',words:['Es','difícil','pero','importante','.'],extra:['fácil','interesante','está','rápido'],tip:'Combinatie van twee bijvoeglijke naamwoorden'},
+  {nl:'Ik denk dat het goedkoop is.',es:'Pienso que es barato.',words:['Pienso','que','es','barato','.'],extra:['creo','caro','está','piensas'],tip:'Pienso que = ik denk dat (pensar)'},
+  {nl:'Kunnen jullie ons helpen?',es:'¿Pueden ayudarnos?',words:['¿Pueden','ayudarnos?'],extra:['podemos','ayudarte','quieren','necesitan'],tip:'Ayudarnos = ons helpen (ayudar + nos)'},
+  {nl:'Ik heb een nieuwe baan nodig.',es:'Necesito un trabajo nuevo.',words:['Necesito','un','trabajo','nuevo','.'],extra:['necesitas','viejo','quiero','casa'],tip:'Necesito = ik heb nodig (necesitar)'},
+  {nl:'We komen volgende week aan.',es:'Llegamos la semana que viene.',words:['Llegamos','la','semana','que','viene','.'],extra:['llegan','mes','año','ayer'],tip:'La semana que viene = volgende week'},
+  {nl:'Mijn kamer is klein maar mooi.',es:'Mi habitación es pequeña pero bonita.',words:['Mi','habitación','es','pequeña','pero','bonita','.'],extra:['grande','fea','hotel','está'],tip:'Habitación is vrouwelijk: pequeña, bonita'},
+  {nl:'Ga rechtdoor en dan links.',es:'Siga recto y luego a la izquierda.',words:['Siga','recto','y','luego','a','la','izquierda','.'],extra:['derecha','cerca','lejos','vaya'],tip:'Siga = formele gebiedende wijs van seguir'},
+  {nl:'Het strand is niet ver van hier.',es:'La playa no está lejos de aquí.',words:['La','playa','no','está','lejos','de','aquí','.'],extra:['cerca','es','mapa','hotel'],tip:'Está lejos/cerca voor afstand (estar)'},
+  {nl:'Ik lees elke avond een boek.',es:'Leo un libro cada noche.',words:['Leo','un','libro','cada','noche','.'],extra:['leemos','escribo','día','semana'],tip:'Leo = ik lees (leer)'},
+  {nl:'Zij weet niet waar haar koffer is.',es:'Ella no sabe dónde está su maleta.',words:['Ella','no','sabe','dónde','está','su','maleta','.'],extra:['conoce','sé','mi','hotel'],tip:'Su = haar/zijn/hun (bezittelijk)'},
+  {nl:'We zoeken een goedkoop hotel.',es:'Buscamos un hotel barato.',words:['Buscamos','un','hotel','barato','.'],extra:['busco','caro','nuevo','encontramos'],tip:'Buscamos = wij zoeken (buscar)'},
+  {nl:'Hij komt elke dinsdag.',es:'Viene cada martes.',words:['Viene','cada','martes','.'],extra:['vengo','lunes','semana','va'],tip:'Viene = hij/zij komt (venir)'},
+  {nl:'Dat is heel interessant.',es:'Eso es muy interesante.',words:['Eso','es','muy','interesante','.'],extra:['está','importante','fácil','esto'],tip:'Eso = dat (verder weg dan esto)'},
+  {nl:'We spelen elk weekend voetbal.',es:'Jugamos al fútbol cada fin de semana.',words:['Jugamos','al','fútbol','cada','fin','de','semana','.'],extra:['juego','tenis','siempre','nunca'],tip:'Jugar al + sport = sporten'},
+  {nl:'Vind je het ticket duur?',es:'¿Encuentras caro el billete?',words:['¿Encuentras','caro','el','billete?'],extra:['encuentro','barato','maleta','buscas'],tip:'Encuentras = jij vindt (encontrar)'},
+];
+
+// ════════════════════════════════════════════════════════════════════
+// ZINNEN — LEVEL 3
+// ════════════════════════════════════════════════════════════════════
+const SENT_L3=[
+  {nl:'Hoewel het moeilijk is, gaan we door.',es:'Aunque es difícil, seguimos adelante.',words:['Aunque','es','difícil',',','seguimos','adelante','.'],extra:['mientras','fácil','vamos','porque'],tip:'Aunque + indicatief = feitelijke concessie'},
+  {nl:'Wij moeten rekening houden met de gevolgen.',es:'Debemos tener en cuenta las consecuencias.',words:['Debemos','tener','en','cuenta','las','consecuencias','.'],extra:['consideramos','el','medida','reto'],tip:'Tener en cuenta = rekening houden met'},
+  {nl:'Het bedrijf heeft een nieuwe strategie nodig.',es:'La empresa necesita una nueva estrategia.',words:['La','empresa','necesita','una','nueva','estrategia','.'],extra:['necesitamos','vieja','objetivo','reunión'],tip:'Necesita = het heeft nodig (necesitar)'},
+  {nl:'In feite is dit een grote uitdaging.',es:'De hecho, este es un gran reto.',words:['De','hecho',',','este','es','un','gran','reto','.'],extra:['esto','logro','amenaza','aunque'],tip:'De hecho = in feite (uitdrukking)'},
+  {nl:'Wij beseften dat het te laat was.',es:'Nos dimos cuenta de que era demasiado tarde.',words:['Nos','dimos','cuenta','de','que','era','demasiado','tarde','.'],extra:['damos','temprano','es','fue'],tip:'Darse cuenta de = beseffen (verleden tijd: nos dimos)'},
+  {nl:'Ondanks de problemen, hebben we het doel bereikt.',es:'A pesar de los problemas, logramos el objetivo.',words:['A','pesar','de','los','problemas',',','logramos','el','objetivo','.'],extra:['lograron','reto','aunque','sin'],tip:'A pesar de = ondanks. Logramos = wij bereikten'},
+  {nl:'Het is essentieel om een duurzame aanpak te hebben.',es:'Es imprescindible tener un enfoque sostenible.',words:['Es','imprescindible','tener','un','enfoque','sostenible','.'],extra:['importante','innovador','criterio','eficaz'],tip:'Imprescindible = onmisbaar/essentieel'},
+  {nl:'Wat de strategie betreft, moeten we nadenken.',es:'En cuanto a la estrategia, debemos reflexionar.',words:['En','cuanto','a','la','estrategia',',','debemos','reflexionar','.'],extra:['considerar','objetivo','plazo','sugerir'],tip:'En cuanto a = wat betreft'},
+  {nl:'Ik stel voor dat we de termijn verlengen.',es:'Sugiero que extendamos el plazo.',words:['Sugiero','que','extendamos','el','plazo','.'],extra:['sugieren','reunión','objetivo','propongo'],tip:'Sugerir que + subjuntivo'},
+  {nl:'Het is onvermijdelijk dat er gevolgen zijn.',es:'Es inevitable que haya consecuencias.',words:['Es','inevitable','que','haya','consecuencias','.'],extra:['hay','imprescindible','amenaza','logro'],tip:'Haya = subjuntivo van haber (er zijn)'},
+  {nl:'Wij zijn trots op deze prestatie.',es:'Estamos orgullosos de este logro.',words:['Estamos','orgullosos','de','este','logro','.'],extra:['decepcionados','reto','esta','agradecidos'],tip:'Orgullosos de = trots op'},
+  {nl:'Deze maatregel is doeltreffend gebleken.',es:'Esta medida ha resultado eficaz.',words:['Esta','medida','ha','resultado','eficaz','.'],extra:['eficaces','innovadora','han','reto'],tip:'Ha resultado = is gebleken (perfectum)'},
+  {nl:'We moeten de uitdagingen het hoofd bieden.',es:'Debemos enfrentar los retos.',words:['Debemos','enfrentar','los','retos','.'],extra:['evitar','amenazas','logros','enfrentamos'],tip:'Enfrentar = het hoofd bieden aan'},
+  {nl:'Het criterium is niet duidelijk genoeg.',es:'El criterio no es lo suficientemente claro.',words:['El','criterio','no','es','lo','suficientemente','claro','.'],extra:['enfoque','clara','percepción','está'],tip:'Lo suficientemente + bijvoeglijk naamwoord'},
+  {nl:'Mits het mogelijk is, doen we het.',es:'Siempre que sea posible, lo hacemos.',words:['Siempre','que','sea','posible',',','lo','hacemos','.'],extra:['es','aunque','hacen','imposible'],tip:'Siempre que + subjuntivo = mits'},
+];
+
+const SENTENCES=[...SENT_L1,...SENT_L2,...SENT_L3];
+const SENT_LEVELS=[SENT_L1.length,SENT_L2.length,SENT_L3.length];
+
 
 const SPEAK_ITEMS=[
   {es:'Hola',nl:'Hallo',tip:'De "h" is stil in het Spaans. Zeg gewoon: "oh-la"',example:'¡Hola! ¿Cómo estás?'},
@@ -471,13 +703,57 @@ function saveAll(u){localStorage.setItem('sg_users',JSON.stringify(u))}
 function getUser(name){
   const all=allUsers();
   if(!all[name]){
-    all[name]={name,avatar:name==='Arjette'?'👩':name==='Tonito'?'👨':'🧑',streak:0,lastDate:null,xp:0,learned:[],failed:[],sentOk:0,sentDone:0,speakDone:0};
+    all[name]={name,avatar:name==='Arjette'?'👩':name==='Tonito'?'👨':'🧑',streak:0,lastDate:null,xp:0,learned:[],failed:[],sentOk:0,sentDone:0,speakDone:0,level:1};
     saveAll(all);
   }
+  if(all[name].level===undefined)all[name].level=1;
   return all[name];
 }
 
 function save(){const all=allUsers();all[CU.name]=CU;saveAll(all)}
+
+// ── LEVELS ───────────────────────────────────────────────────────────
+const LEVEL_NAMES=['Beginner','Gevorderd','Vergevorderd'];
+const LEVEL_EMOJIS=['🌱','🌿','🌳'];
+const LEVEL_WORD_SETS=[WORDS_L1,WORDS_L2,WORDS_L3];
+const LEVEL_SENT_SETS=[SENT_L1,SENT_L2,SENT_L3];
+
+function wordsForLevel(lvl){return LEVEL_WORD_SETS[lvl-1];}
+function sentsForLevel(lvl){return LEVEL_SENT_SETS[lvl-1];}
+
+function levelWordPct(lvl){
+  const set=wordsForLevel(lvl);
+  const learned=new Set(CU.learned);
+  const count=set.filter(w=>learned.has(w.id)).length;
+  return Math.round(count/set.length*100);
+}
+
+function isLevelUnlocked(lvl){
+  if(lvl===1)return true;
+  return levelWordPct(lvl-1)>=80;
+}
+
+function renderLevelRow(){
+  const row=document.getElementById('level-row');
+  if(!row)return;
+  row.innerHTML='';
+  [1,2,3].forEach(lvl=>{
+    const unlocked=isLevelUnlocked(lvl);
+    const pct=levelWordPct(lvl);
+    const d=document.createElement('div');
+    d.className='level-card'+(CU.level===lvl?' active':'')+(unlocked?'':' locked');
+    d.innerHTML=`
+      ${unlocked?'':'<span class="level-lock">🔒</span>'}
+      <div class="level-emoji">${LEVEL_EMOJIS[lvl-1]}</div>
+      <div class="level-name">${LEVEL_NAMES[lvl-1]}</div>
+      <div class="level-pct">${unlocked?pct+'% geleerd':'Vanaf 80% niv.'+(lvl-1)}</div>
+    `;
+    if(unlocked){
+      d.onclick=()=>{CU.level=lvl;save();updateBar();renderHome();};
+    }
+    row.appendChild(d);
+  });
+}
 
 // ── LOGIN ────────────────────────────────────────────────────────────
 function renderLogin(){
@@ -523,6 +799,8 @@ function updateBar(){
   document.getElementById('tb-streak').textContent='🔥 '+CU.streak;
   document.getElementById('tb-xp').textContent='⭐ '+CU.xp;
   document.getElementById('tb-user').textContent=CU.avatar+' '+CU.name;
+  const badge=document.querySelector('.top-badge');
+  if(badge)badge.textContent=LEVEL_NAMES[CU.level-1];
 }
 
 // ── NAVIGATION ───────────────────────────────────────────────────────
@@ -545,12 +823,17 @@ function renderHome(){
   const h=new Date().getHours();
   const g=h<12?'¡Buenos días':h<18?'¡Buenas tardes':'¡Buenas noches';
   document.getElementById('home-greeting').textContent=g+', '+CU.name+'!';
-  document.getElementById('sh-words').textContent=CU.learned.length;
+  renderLevelRow();
+  const lvlWords=wordsForLevel(CU.level);
+  const lvlSents=sentsForLevel(CU.level);
+  const learned=new Set(CU.learned);
+  const lvlLearnedCount=lvlWords.filter(w=>learned.has(w.id)).length;
+  document.getElementById('sh-words').textContent=lvlLearnedCount;
   document.getElementById('sh-streak').textContent=CU.streak;
   document.getElementById('sh-xp').textContent=CU.xp;
   document.getElementById('sh-sent').textContent=CU.sentOk;
-  const wp=Math.round(CU.learned.length/WORDS.length*100);
-  const sp=Math.round(CU.sentOk/SENTENCES.length*100);
+  const wp=Math.round(lvlLearnedCount/lvlWords.length*100);
+  const sp=Math.round(Math.min(CU.sentOk,lvlSents.length)/lvlSents.length*100);
   document.getElementById('ph-wp').textContent=wp+'%';
   document.getElementById('ph-wf').style.width=wp+'%';
   document.getElementById('ph-sp').textContent=sp+'%';
@@ -558,20 +841,21 @@ function renderHome(){
 }
 
 // ── WORDS ────────────────────────────────────────────────────────────
-const CATS=['Alle','Begroetingen','Beleefdheid','Voornaamwoorden','Eten & drinken','Dagelijks leven','Mensen','Werkwoorden','Bijvoeglijk','Getallen','Tijd','Vragen'];
 let wFiltered=[],wIdx=0,wFlipped=false;
 
 function initWords(){
+  const levelWords=wordsForLevel(CU.level);
+  const cats=['Alle',...new Set(levelWords.map(w=>w.cat))];
   const cs=document.getElementById('cat-scroll');
   cs.innerHTML='';
-  CATS.forEach(c=>{
+  cats.forEach(c=>{
     const b=document.createElement('button');
     b.className='cat-chip'+(c==='Alle'?' active':'');
     b.textContent=c;
-    b.onclick=()=>{document.querySelectorAll('.cat-chip').forEach(x=>x.classList.remove('active'));b.classList.add('active');wFiltered=c==='Alle'?[...WORDS]:WORDS.filter(w=>w.cat===c);wIdx=0;showCard()};
+    b.onclick=()=>{document.querySelectorAll('.cat-chip').forEach(x=>x.classList.remove('active'));b.classList.add('active');wFiltered=c==='Alle'?[...levelWords]:levelWords.filter(w=>w.cat===c);wIdx=0;showCard()};
     cs.appendChild(b);
   });
-  wFiltered=[...WORDS];wIdx=0;showCard();
+  wFiltered=[...levelWords];wIdx=0;showCard();
 }
 
 function showCard(){
@@ -585,7 +869,7 @@ function showCard(){
   document.getElementById('c-hint').textContent=w.hint;
   document.getElementById('c-learned').style.display=learned.has(w.id)?'block':'none';
   document.getElementById('c-tap').textContent='Tik om te omdraaien';
-  document.getElementById('word-ctr').textContent=(wIdx%wFiltered.length+1)+' / '+wFiltered.length+' · '+CU.learned.length+' geleerd';
+  document.getElementById('word-ctr').textContent=(wIdx%wFiltered.length+1)+' / '+wFiltered.length+' · '+levelWordPct(CU.level)+'% geleerd';
   document.getElementById('card-inner').classList.remove('flipped');
   document.getElementById('ans-btns').style.display='none';
   document.getElementById('flip-btns').style.display='flex';
@@ -605,10 +889,13 @@ function answerWord(ok){
   const w=wFiltered[wIdx%wFiltered.length];
   const learned=new Set(CU.learned);
   const failed=new Set(CU.failed);
+  const wasUnlocked2=isLevelUnlocked(2),wasUnlocked3=isLevelUnlocked(3);
   if(ok){learned.add(w.id);failed.delete(w.id);CU.xp+=10;confetti();toast('✓ +10 XP!');}
   else{failed.add(w.id);learned.delete(w.id);CU.xp=Math.max(0,CU.xp-2);}
   CU.learned=[...learned];CU.failed=[...failed];
   save();updateBar();
+  if(!wasUnlocked2&&isLevelUnlocked(2))setTimeout(()=>toast('🎉 Niveau Gevorderd ontgrendeld!'),900);
+  if(!wasUnlocked3&&isLevelUnlocked(3))setTimeout(()=>toast('🎉 Niveau Vergevorderd ontgrendeld!'),900);
   wIdx++;
   setTimeout(showCard,80);
 }
@@ -616,17 +903,17 @@ function answerWord(ok){
 function skipWord(){wIdx++;showCard();}
 
 // ── SENTENCES ────────────────────────────────────────────────────────
-let sIdx=0,sTiles=[],sChecked=false;
+let sIdx=0,sTiles=[],sChecked=false,sList=[];
 
-function initSents(){sIdx=0;sChecked=false;loadSent();}
+function initSents(){sIdx=0;sChecked=false;sList=sentsForLevel(CU.level);loadSent();}
 
 function loadSent(){
-  const s=SENTENCES[sIdx%SENTENCES.length];
+  const s=sList[sIdx%sList.length];
   sTiles=[];sChecked=false;
   document.getElementById('s-nl').textContent=s.nl;
   document.getElementById('s-tip').textContent='💡 '+s.tip;
-  document.getElementById('s-num').textContent=(sIdx%SENTENCES.length+1)+' / '+SENTENCES.length;
-  document.getElementById('s-prog').style.width=Math.round((sIdx%SENTENCES.length+1)/SENTENCES.length*100)+'%';
+  document.getElementById('s-num').textContent=(sIdx%sList.length+1)+' / '+sList.length;
+  document.getElementById('s-prog').style.width=Math.round((sIdx%sList.length+1)/sList.length*100)+'%';
   document.getElementById('s-fb').style.display='none';
   const az=document.getElementById('ans-zone');
   az.innerHTML='';az.className='ans-zone';
@@ -667,7 +954,7 @@ function clearSent(){
 
 function normalize(str){return str.toLowerCase().replace(/[¡¿.,!?'"]/g,'').replace(/\s+/g,' ').trim();}
 function checkSent(){
-  const s=SENTENCES[sIdx%SENTENCES.length];
+  const s=sList[sIdx%sList.length];
   const ans=normalize(sTiles.map(t=>t.w).join(' '));
   const cor=normalize(s.words.join(' '));
   const ok=ans===cor;
